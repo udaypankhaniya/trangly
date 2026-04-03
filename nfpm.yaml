@@ -1,0 +1,25 @@
+name: "trangly"
+arch: "${GOARCH}"
+platform: "linux"
+version: "${VERSION}"
+section: "utils"
+priority: "optional"
+maintainer: "Trangly <support@trangly.dev>"
+description: |
+  Lightweight self-hosted CI/CD for Docker projects.
+  Watches a GitHub repo and auto-redeploys a Docker-based application on every
+  push — zero YAML, zero cloud accounts, zero DevOps knowledge required.
+vendor: "Trangly"
+homepage: "https://trangly.dev"
+license: "MIT"
+
+contents:
+  - src: ./dist/trangly-linux
+    dst: /usr/local/bin/trangly
+    file_info:
+      mode: 0755
+      owner: root
+      group: root
+
+scripts:
+  postinstall: ./scripts/postinstall.sh

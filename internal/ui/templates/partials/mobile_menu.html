@@ -1,0 +1,46 @@
+{{define "mobile_menu"}}
+  <!-- Mobile Slide-In Menu (left side) -->
+  <div x-show="mobileMenuOpen" x-cloak class="mobile-menu-backdrop" @click="mobileMenuOpen = false" x-transition.opacity></div>
+  <div x-show="mobileMenuOpen" x-cloak class="mobile-menu animate-slide-in-left">
+    <div class="mobile-menu-header">
+      <a href="/dashboard" class="flex items-center gap-2">
+        <div class="w-5 h-5 bg-white flex items-center justify-center rounded-sm">
+          <i class="fa-solid fa-terminal text-black" style="font-size:9px"></i>
+        </div>
+        <span class="font-mono text-xs font-bold">Trangly</span>
+      </a>
+      <button @click="mobileMenuOpen = false" class="btn-ghost px-2" type="button">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <nav class="flex flex-col gap-1 p-3">
+      <a href="/dashboard" class="mobile-menu-link{{if eq .ActiveNav "dashboard"}} mobile-menu-link--active{{end}}">
+        <i class="fa-solid fa-gauge mobile-menu-link-icon"></i> Dashboard
+      </a>
+      <a href="/deployments" class="mobile-menu-link{{if eq .ActiveNav "deployments"}} mobile-menu-link--active{{end}}">
+        <i class="fa-solid fa-rocket mobile-menu-link-icon"></i> Deployments
+      </a>
+      <a href="/settings" class="mobile-menu-link{{if eq .ActiveNav "settings"}} mobile-menu-link--active{{end}}">
+        <i class="fa-solid fa-gear mobile-menu-link-icon"></i> Settings
+      </a>
+      <a href="/profile" class="mobile-menu-link{{if eq .ActiveNav "profile"}} mobile-menu-link--active{{end}}">
+        <i class="fa-solid fa-circle-user mobile-menu-link-icon"></i> Edit Profile
+      </a>
+    </nav>
+    <div class="mt-auto p-4 border-t border-[var(--border-subtle)] flex flex-col gap-1">
+      <button type="button" class="sidebar-footer-btn" onclick="(function(){
+        var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        document.documentElement.classList.toggle('dark', t === 'dark');
+        localStorage.setItem('sy_theme', t);
+      })()">
+        <i class="fa-solid fa-circle-half-stroke"></i>
+        <span class="sidebar-footer-label">Toggle theme</span>
+      </button>
+      <button @click="api.logout()" class="sidebar-footer-btn sidebar-footer-btn--danger" type="button">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span class="sidebar-footer-label">Sign out</span>
+      </button>
+    </div>
+  </div>
+{{end}}

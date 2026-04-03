@@ -1,0 +1,115 @@
+{{define "body_class"}} overflow-hidden{{end}}
+
+{{define "content"}}
+  <main class="flex min-h-screen">
+    <!-- Left: CSS grid hero (desktop only) -->
+    <section class="hidden lg:flex lg:w-5/12 relative overflow-hidden items-center justify-center login-hero-grid">
+      <div class="absolute inset-0 bg-gradient-to-tr from-[var(--bg-base)] via-transparent to-transparent z-10"></div>
+      <div class="relative z-20 text-center px-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-6">
+          <i class="fa-solid fa-terminal text-black text-2xl"></i>
+        </div>
+        <h2 class="page-title mb-3">Push. Deploy. Done.</h2>
+        <p class="body-sm font-mono text-xs uppercase tracking-widest max-w-xs mx-auto">
+          Self-hosted Docker CI/CD for solo developers.
+        </p>
+      </div>
+    </section>
+
+    <!-- Right: Login Form -->
+    <section class="w-full lg:w-7/12 flex flex-col relative bg-[var(--bg-base)]">
+      <!-- Theme toggle -->
+      <button id="theme-toggle" class="absolute top-4 right-4 lg:top-6 lg:right-6 btn-ghost px-2 z-20" aria-label="Toggle theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- Form area -->
+      <div class="flex-1 flex items-center justify-center px-6 sm:px-12">
+        <div class="w-full max-w-[400px]">
+          <!-- Logo wordmark -->
+          <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 bg-white flex items-center justify-center rounded-sm">
+                <i class="fa-solid fa-terminal text-black text-xs"></i>
+              </div>
+              <span class="font-mono font-bold tracking-tight text-lg">Trangly</span>
+            </div>
+            <h1 class="page-title mb-1">Sign in</h1>
+            <p class="body-sm">Use the credentials set at first run.</p>
+          </div>
+
+          <!-- Server Error -->
+          <div x-show="error" x-cloak class="alert-error mb-6">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span x-text="error"></span>
+          </div>
+
+          <!-- Form -->
+          <form @submit.prevent="doLogin()" novalidate class="space-y-5">
+            <!-- Username -->
+            <div :class="{ 'has-error': errors.username }">
+              <label for="un">Username</label>
+              <div class="input-wrapper">
+                <input id="un" type="text"
+                       x-model="username"
+                       @input="clearError('username')"
+                       @blur="validateField('username')"
+                       placeholder="Enter username"
+                       autocomplete="username"
+                       autofocus />
+                <span class="input-icon"><i class="fa-solid fa-user"></i></span>
+              </div>
+              <p class="field-error" x-show="errors.username" x-text="errors.username" x-cloak></p>
+            </div>
+
+            <!-- Password -->
+            <div :class="{ 'has-error': errors.password }">
+              <div class="flex justify-between items-center mb-2">
+                <label for="pw" class="mb-0">Password</label>
+                <button type="button"
+                        class="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                        @click="showPassword = !showPassword"
+                        :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                        tabindex="-1">
+                  <span x-text="showPassword ? 'Hide' : 'Show'"></span>
+                </button>
+              </div>
+              <div class="input-wrapper">
+                <input id="pw"
+                       :type="showPassword ? 'text' : 'password'"
+                       x-model="password"
+                       @input="clearError('password')"
+                       @blur="validateField('password')"
+                       placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                       autocomplete="current-password" />
+                <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+              </div>
+              <p class="field-error" x-show="errors.password" x-text="errors.password" x-cloak></p>
+            </div>
+
+            <!-- Submit -->
+            <div class="pt-2">
+              <button type="submit"
+                      :disabled="loading"
+                      class="btn-primary w-full justify-center h-11 text-sm uppercase tracking-widest">
+                <i class="fa-solid fa-circle-notch fa-spin" x-show="loading"></i>
+                <span x-text="loading ? 'Authenticating\u2026' : 'Sign In'"></span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Footer -->
+          <div class="mt-10 pt-6 border-t border-[var(--border-subtle)]">
+            <p class="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)] text-center">
+              Single-admin access &mdash; AES-256-GCM encrypted session
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+{{end}}
+
+{{define "scripts"}}
+  <script src="/static/js/login.js"></script>
+{{end}}

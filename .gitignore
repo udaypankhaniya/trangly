@@ -1,0 +1,34 @@
+# Dev data
+dev-data/
+
+# Build output
+dist/
+
+# Coverage
+coverage.out
+coverage.html
+
+# Binaries (local builds)
+*.exe
+*.exe~
+trangly.exe
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Editor / OS artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/settings.json
+
+# Trangly runtime data (never commit production data)
+master.key
+config.db
+github-app.pem
+workspaces/
+logs/
+

@@ -1,0 +1,241 @@
+{{define "content"}}
+    <!-- Loading State -->
+    <div x-show="!project && !loadError" class="flex-1 flex items-center justify-center">
+      <i class="fa-solid fa-circle-notch fa-spin text-xl text-[var(--text-muted)]"></i>
+    </div>
+
+    <!-- Error State -->
+    <div x-show="loadError" class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <i class="fa-solid fa-circle-exclamation text-4xl text-[var(--color-fail)] mb-4 block"></i>
+        <h3 class="text-sm font-bold mb-2" x-text="loadError"></h3>
+        <a href="/dashboard" class="text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] underline">Back to Dashboard</a>
+      </div>
+    </div>
+
+    <!-- Project Content -->
+    <template x-if="project">
+      <main class="page-container">
+
+        <!-- Back + Deployment Header -->
+        <div class="mb-3">
+          <a href="/dashboard" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest">
+            <i class="fa-solid fa-arrow-left text-xs"></i> Dashboard
+          </a>
+        </div>
+
+        <section class="mb-8">
+          <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-l-4 border-[var(--accent)] pl-5 py-2">
+            <div>
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <h1 class="text-2xl font-bold tracking-tight uppercase" x-text="project.name"></h1>
+                <span class="px-2 py-0.5 bg-[var(--bg-elevated)] text-[10px] font-mono border border-[var(--border-default)] text-[var(--text-muted)] uppercase tracking-widest"
+                      x-text="currentStatus"></span>
+                <span x-show="project.deploy_mode === 'hot_swap'"
+                      class="px-2 py-0.5 bg-purple-500/15 text-purple-400 text-[10px] font-mono border border-purple-500/30 uppercase tracking-widest">
+                  Hot Swap
+                </span>
+              </div>
+              <div class="flex flex-wrap items-center gap-4 text-[var(--text-muted)]">
+                <div class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-code-branch text-xs"></i>
+                  <span class="font-mono text-xs" x-text="project.default_branch"></span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <i class="fa-brands fa-github text-xs"></i>
+                  <span class="font-mono text-xs truncate max-w-[200px]" x-text="project.repo_full_name"></span>
+                </div>
+                <template x-if="job">
+                  <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-code-commit text-xs"></i>
+                    <span class="font-mono text-xs" x-text="job.commit_sha?.substring(0, 7)"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <template x-if="!job || ['success','failed'].includes(job.status)">
+              <button @click="triggerDeploy()"
+                      class="btn-primary self-start sm:self-auto shrink-0">
+                <i class="fa-solid fa-rocket text-xs"></i> Deploy Now
+              </button>
+            </template>
+            <template x-if="job && !['success','failed'].includes(job.status)">
+              <div class="btn-secondary self-start sm:self-auto shrink-0 cursor-default">
+                <i class="fa-solid fa-circle-notch fa-spin text-xs"></i> Deploying...
+              </div>
+            </template>
+          </div>
+        </section>
+
+        <!-- Tabs Navigation -->
+        <div class="tab-bar mb-6">
+          <button @click="switchTab('logs')" class="tab-item" :class="{ 'active': tab === 'logs' }">Logs</button>
+          <button @click="switchTab('history')" class="tab-item" :class="{ 'active': tab === 'history' }">History</button>
+        </div>
+
+        <!-- Logs Tab -->
+        <section x-show="tab === 'logs'">
+          <div class="flex flex-col lg:flex-row gap-4 lg:gap-5">
+
+            <!-- LEFT: Pipeline Sidebar -->
+            <aside class="flex-none lg:w-48 order-2 lg:order-1">
+              <div class="label-mono mb-2 hidden lg:block">Pipeline</div>
+              <nav class="ps-sidebar">
+                <template x-for="phase in pipelinePhases" :key="phase">
+                  <button class="ps-step" :class="pipelineStepClass(phase)" @click="selectPhase(phase)">
+                    <span class="ps-step-icon">
+                      <i :class="{
+                        'fa-solid fa-circle-check':               phaseState(phase) === 'done',
+                        'fa-solid fa-circle-xmark':               phaseState(phase) === 'active' && job?.status === 'failed',
+                        'fa-solid fa-circle-notch fa-spin':       phaseState(phase) === 'active' && job?.status !== 'failed',
+                        'fa-regular fa-circle opacity-40':        phaseState(phase) !== 'done' && phaseState(phase) !== 'active'
+                      }"></i>
+                    </span>
+                    <span class="ps-step-body">
+                      <span class="ps-step-label" x-text="phase.replace(/_/g,' ')"></span>
+                      <span class="ps-step-meta"
+                            x-text="phaseState(phase) === 'done' ? 'done' : phaseState(phase) === 'active' ? (job?.status === 'failed' ? 'failed' : 'running') : 'pending'"
+                      ></span>
+                    </span>
+                  </button>
+                </template>
+              </nav>
+              <!-- Commit meta (desktop only) -->
+              <template x-if="job && job.commit_sha">
+                <div class="mt-4 pt-4 border-t border-[var(--border-subtle)] hidden lg:block space-y-1">
+                  <div class="label-mono">Commit</div>
+                  <div class="font-mono text-xs" x-text="job.commit_sha?.substring(0,7)"></div>
+                  <div class="font-mono text-[10px] text-[var(--text-muted)] truncate" x-text="job.branch"></div>
+                </div>
+              </template>
+            </aside>
+
+            <!-- RIGHT: Log Viewer -->
+            <div class="flex-1 min-w-0 order-1 lg:order-2">
+              <div class="flex items-center justify-between mb-2">
+                <span class="label-mono">Output</span>
+                <template x-if="['running','building','health_check','swapping','hot_swapping'].includes(job?.status || '')">
+                  <div class="flex items-center gap-1.5">
+                    <span class="inline-block w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-yellow-400">Live</span>
+                  </div>
+                </template>
+              </div>
+              <div id="log-output" class="log-viewer h-[340px] sm:h-[420px] lg:h-[540px] log-scroll">
+                <template x-for="(line, idx) in logLines" :key="idx">
+                  <div class="log-line flex gap-3 lg:gap-4 mb-1">
+                    <span class="log-line-num text-[11px] lg:text-xs" x-text="idx + 1"></span>
+                    <span class="whitespace-pre-wrap break-all text-[12px] lg:text-[13px]" x-text="line"></span>
+                  </div>
+                </template>
+                <div x-show="logLines.length === 0" class="text-[var(--text-muted)] text-center py-12 lg:py-16">
+                  <i class="fa-solid fa-terminal text-3xl mb-2 block"></i>
+                  <p class="font-mono text-xs">No logs yet. Trigger a deploy to see output.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- History Tab -->
+        <section x-show="tab === 'history'">
+          <div class="space-y-2">
+            <template x-for="h in history" :key="h.id">
+              <div class="flex items-center gap-4 p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-[var(--border-strong)] transition-all">
+                <i class="text-lg shrink-0" :class="{
+                  'fa-solid fa-circle-check text-[var(--color-ok)]':   h.status === 'success',
+                  'fa-solid fa-circle-xmark text-[var(--color-fail)]': h.status === 'failed',
+                  'fa-solid fa-clock text-[var(--color-warn)]':        h.status === 'pending' || h.status === 'held',
+                  'fa-solid fa-circle-notch fa-spin text-[var(--color-info)]': ['running','building','health_check','swapping'].includes(h.status),
+                  'fa-regular fa-circle text-[var(--text-muted)]':     !['success','failed','pending','held','running','building','health_check','swapping'].includes(h.status)
+                }"></i>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 text-xs font-mono">
+                    <code x-text="h.commit_sha?.substring(0, 7)"></code>
+                    <span class="text-[var(--text-muted)]">on</span>
+                    <span x-text="h.branch"></span>
+                    <span class="text-[var(--text-muted)]">&middot;</span>
+                    <span class="text-[var(--text-muted)] uppercase text-[10px] tracking-wider" x-text="h.status"></span>
+                  </div>
+                  <div class="flex items-center gap-2 text-[11px] text-[var(--text-muted)] mt-0.5 font-mono">
+                    <span x-text="timeAgo(h.finished_at || h.queued_at)"></span>
+                    <template x-if="h.started_at && h.finished_at">
+                      <span>&middot; <span x-text="duration(h.started_at, h.finished_at)"></span></span>
+                    </template>
+                    <template x-if="h.error">
+                      <span class="text-[var(--color-fail)] truncate max-w-[300px]" x-text="h.error"></span>
+                    </template>
+                  </div>
+                </div>
+                <a :href="'https://github.com/' + project.repo_full_name + '/commit/' + h.commit_sha"
+                   target="_blank" rel="noopener"
+                   class="btn-ghost px-2" title="View on GitHub">
+                  <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                </a>
+                <button @click="redeploy(h)" class="btn-secondary text-xs px-3 h-7 shrink-0">Redeploy</button>
+              </div>
+            </template>
+          </div>
+
+          <!-- Empty State -->
+          <div x-show="!historyLoading && history.length === 0" class="empty-state">
+            <div class="empty-state-icon">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <h3 class="empty-state-title">No deployment history yet</h3>
+          </div>
+
+          <!-- Load More -->
+          <div x-show="historyHasMore" class="text-center pt-6">
+            <button @click="loadHistory(true)" :disabled="historyLoading"
+                    class="btn-ghost text-xs font-mono inline-flex items-center gap-2">
+              <i class="fa-solid fa-circle-notch fa-spin text-xs" x-show="historyLoading"></i>
+              Load More
+            </button>
+          </div>
+
+          <!-- Loading -->
+          <div x-show="historyLoading && history.length === 0" class="text-center py-12">
+            <i class="fa-solid fa-circle-notch fa-spin text-xl text-[var(--text-muted)]"></i>
+          </div>
+        </section>
+
+        <!-- Context Grid -->
+        <section class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-[var(--bg-surface)] p-4 border border-[var(--border-default)] rounded-lg">
+            <div class="flex items-center justify-between mb-3">
+              <span class="label-mono">Branch</span>
+              <i class="fa-solid fa-code-branch text-xs text-[var(--text-muted)]"></i>
+            </div>
+            <div class="font-mono text-sm mb-1" x-text="project.default_branch"></div>
+            <div class="label-mono text-[9px]" x-text="project.compose_path || 'docker-compose.yml'"></div>
+          </div>
+          <div class="bg-[var(--bg-surface)] p-4 border border-[var(--border-default)] rounded-lg">
+            <div class="flex items-center justify-between mb-3">
+              <span class="label-mono">Memory</span>
+              <i class="fa-solid fa-microchip text-xs text-[var(--text-muted)]"></i>
+            </div>
+            <div class="font-mono text-sm mb-1" x-text="project.mem_limit_mb > 0 ? project.mem_limit_mb + ' MB' : 'Auto'"></div>
+            <div class="label-mono text-[9px]">Allocation limit</div>
+          </div>
+          <div class="bg-[var(--bg-surface)] p-4 border border-[var(--border-default)] rounded-lg">
+            <div class="flex items-center justify-between mb-3">
+              <span class="label-mono">Repository</span>
+              <i class="fa-brands fa-github text-xs text-[var(--text-muted)]"></i>
+            </div>
+            <div class="font-mono text-sm tracking-tight mb-1 truncate" x-text="project.repo_full_name"></div>
+            <a :href="'https://github.com/' + project.repo_full_name" target="_blank" rel="noopener"
+               class="text-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] font-mono uppercase transition-colors inline-flex items-center gap-1">
+              View on GitHub <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+            </a>
+          </div>
+        </section>
+
+      </main>
+    </template>
+{{end}}
+
+{{define "scripts"}}
+  <script src="/static/js/project.js"></script>
+{{end}}

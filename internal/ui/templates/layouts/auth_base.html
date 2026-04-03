@@ -1,0 +1,15 @@
+{{define "auth_base"}}
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  {{template "head" .}}
+  {{block "head_extra" .}}{{end}}
+</head>
+<body class="font-sans antialiased{{block "body_class" .}}{{end}}" x-data="{{.AlpineData}}" x-cloak>
+  {{block "content" .}}{{end}}
+
+  <script src="/static/js/api.js"></script>
+  {{block "scripts" .}}{{end}}
+</body>
+</html>
+{{end}}

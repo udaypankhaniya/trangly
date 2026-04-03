@@ -1,0 +1,121 @@
+{{define "content"}}
+  <main class="flex min-h-screen">
+    <!-- Left: CSS grid hero (desktop only) -->
+    <section class="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center login-hero-grid bg-[var(--bg-lowest)]">
+      <div class="absolute inset-0 bg-gradient-to-tr from-[var(--bg-base)] via-transparent to-transparent z-10"></div>
+      <div class="relative z-20 text-center px-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-6">
+          <i class="fa-solid fa-server text-black text-2xl"></i>
+        </div>
+        <h1 class="page-title mb-3">PROVISIONING<br/>NODE_01</h1>
+        <p class="body-sm font-mono text-xs uppercase tracking-widest max-w-xs mx-auto">
+          System initialization in progress.<br/>Secure admin credentials required.
+        </p>
+      </div>
+    </section>
+
+    <!-- Right: Setup Form -->
+    <section class="w-full lg:w-1/2 flex flex-col relative bg-[var(--bg-base)]">
+      <!-- Theme toggle -->
+      <button id="theme-toggle" class="absolute top-4 right-4 lg:top-6 lg:right-6 btn-ghost px-2 z-20" aria-label="Toggle theme">
+        <i class="fa-solid fa-moon" id="theme-icon"></i>
+      </button>
+
+      <!-- Form area -->
+      <div class="flex-1 flex flex-col justify-center items-center px-6 lg:px-24 py-8 overflow-y-auto">
+        <div class="w-full max-w-md">
+
+          <!-- Already setup banner -->
+          <template x-if="alreadySetup">
+            <div class="text-center py-16">
+              <i class="fa-solid fa-circle-check text-4xl text-[var(--color-ok)] mb-4 block"></i>
+              <h2 class="text-xl font-bold mb-2">Admin account already exists</h2>
+              <p class="body-sm font-mono uppercase tracking-widest mb-8">Setup has been completed</p>
+              <a href="/" class="btn-primary inline-flex items-center justify-center gap-2 px-6">
+                <span class="uppercase tracking-widest text-sm">Go to Sign In</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+              </a>
+            </div>
+          </template>
+
+          <!-- Setup Form -->
+          <template x-if="!alreadySetup">
+            <div>
+              <header class="mb-10">
+                <div class="flex items-center gap-2 mb-4">
+                  <div class="w-7 h-7 bg-white flex items-center justify-center rounded-sm">
+                    <i class="fa-solid fa-terminal text-black text-xs"></i>
+                  </div>
+                  <span class="font-mono font-bold tracking-tight">Trangly</span>
+                </div>
+                <h2 class="page-title mb-1">Create admin account</h2>
+                <p class="body-sm font-mono uppercase tracking-widest">One-time setup process</p>
+              </header>
+
+              <form @submit.prevent="doSetup()" novalidate class="space-y-5">
+                <div class="space-y-2">
+                  <label for="su">Admin Username</label>
+                  <input id="su" type="text" x-model="username" placeholder="e.g. admin" autocomplete="username" autofocus />
+                </div>
+
+                <div class="space-y-2">
+                  <label for="se">Contact Email</label>
+                  <input id="se" type="email" x-model="email" placeholder="admin@example.com" autocomplete="email" />
+                </div>
+
+                <div class="space-y-2">
+                  <label for="sp">Master Password</label>
+                  <input id="sp" :type="showPassword ? 'text' : 'password'" x-model="password" placeholder="Min 8 characters" autocomplete="new-password" />
+                  <div class="pt-2 flex flex-col gap-2">
+                    <div class="flex gap-1 h-[2px] w-full">
+                      <div class="strength-bar" :class="passwordStrength >= 1 ? (passwordStrength === 1 ? 'bg-[var(--color-fail)]' : passwordStrength === 2 ? 'bg-[var(--color-warn)]' : 'bg-[var(--color-ok)]') : 'bg-[var(--bg-elevated)]'"></div>
+                      <div class="strength-bar" :class="passwordStrength >= 2 ? (passwordStrength === 2 ? 'bg-[var(--color-warn)]' : 'bg-[var(--color-ok)]') : 'bg-[var(--bg-elevated)]'"></div>
+                      <div class="strength-bar" :class="passwordStrength >= 3 ? 'bg-[var(--color-ok)]' : 'bg-[var(--bg-elevated)]'"></div>
+                    </div>
+                    <span class="font-mono text-[9px] uppercase tracking-wider"
+                          :class="passwordStrength === 0 ? 'text-[var(--text-muted)]' : passwordStrength === 1 ? 'text-[var(--color-fail)]' : passwordStrength === 2 ? 'text-[var(--color-warn)]' : 'text-[var(--color-ok)]'"
+                          x-text="strengthLabel"></span>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label for="sc">Confirm Password</label>
+                  <input id="sc" :type="showPassword ? 'text' : 'password'" x-model="confirmPassword" placeholder="Re-enter password" autocomplete="new-password"
+                         :class="confirmPassword && password !== confirmPassword ? 'border-[var(--color-fail)]' : ''" />
+                  <p x-show="confirmPassword && password !== confirmPassword" class="text-[var(--color-fail)] font-mono text-[10px] mt-1">Passwords do not match</p>
+                </div>
+
+                <div class="pt-4">
+                  <button type="submit" :disabled="loading" class="btn-primary w-full justify-center h-11">
+                    <i class="fa-solid fa-circle-notch fa-spin text-xs" x-show="loading"></i>
+                    <span class="uppercase tracking-widest text-sm" x-text="loading ? 'Creating account\u2026' : 'Create admin account'"></span>
+                    <i class="fa-solid fa-arrow-right text-xs" x-show="!loading"></i>
+                  </button>
+                </div>
+
+                <div x-show="error" x-cloak class="alert-error">
+                  <i class="fa-solid fa-circle-exclamation"></i>
+                  <span x-text="error"></span>
+                </div>
+              </form>
+
+              <footer class="mt-10 pt-8 border-t border-[var(--border-subtle)]">
+                <div class="flex items-start gap-3">
+                  <i class="fa-solid fa-circle-info text-[var(--text-muted)] shrink-0 mt-0.5"></i>
+                  <p class="text-xs text-[var(--text-muted)] leading-relaxed italic">
+                    This account will serve as the primary root user for this instance. These credentials cannot be recovered if lost.
+                  </p>
+                </div>
+              </footer>
+            </div>
+          </template>
+        </div>
+      </div>
+    </section>
+  </main>
+
+{{end}}
+
+{{define "scripts"}}
+  <script src="/static/js/setup.js"></script>
+{{end}}
