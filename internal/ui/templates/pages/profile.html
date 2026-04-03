@@ -1,0 +1,168 @@
+{{define "content"}}
+    <main class="page-container mx-0 max-w-lg" >
+
+      <!-- Page Header -->
+      <header class="mb-6 flex items-center gap-4">
+        <a href="/settings" class="btn-ghost px-2 -ml-2" title="Back to Settings">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+          <h1 class="page-title mb-1">Edit Profile</h1>
+          <p class="body-sm font-mono">Manage your account information and security.</p>
+        </div>
+      </header>
+
+      <div class="bento-card">
+
+        <!-- Tab Bar -->
+        <div class="tab-bar px-5">
+          <button @click="activeTab = 'info'" class="tab-item" :class="{ 'active': activeTab === 'info' }">
+            <i class="fa-solid fa-circle-user mr-1.5"></i>Profile
+          </button>
+          <button @click="activeTab = 'security'" class="tab-item" :class="{ 'active': activeTab === 'security' }">
+            <i class="fa-solid fa-lock mr-1.5"></i>Security
+          </button>
+        </div>
+
+        <!-- Tab: Profile Info -->
+        <div class="bento-card-body" x-show="activeTab === 'info'" x-cloak>
+          <div class="space-y-4">
+
+            <!-- Username -->
+            <div class="space-y-1.5">
+              <label class="label-mono" for="prof-username">Username</label>
+              <div class="input-wrapper" :class="{ 'has-error': profileErrors.username }">
+                <input id="prof-username" type="text" x-model="profile.username"
+                  @input="profileErrors.username = ''; profileErrors._global = ''"
+                  placeholder="your-username" autocomplete="username" />
+                <span class="input-icon"><i class="fa-solid fa-user"></i></span>
+              </div>
+              <p class="field-error" x-show="profileErrors.username" x-text="profileErrors.username"></p>
+            </div>
+
+            <!-- Email -->
+            <div class="space-y-1.5">
+              <label class="label-mono" for="prof-email">Email</label>
+              <div class="input-wrapper">
+                <input id="prof-email" type="email" x-model="profile.email"
+                  @input="profileErrors._global = ''"
+                  placeholder="you@example.com" autocomplete="email" />
+                <span class="input-icon"><i class="fa-solid fa-envelope"></i></span>
+              </div>
+            </div>
+
+            <!-- Global error -->
+            <div x-show="profileErrors._global" class="alert-error" x-cloak>
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span x-text="profileErrors._global"></span>
+            </div>
+
+            <!-- Success banner -->
+            <div x-show="profileSuccess" class="alert-ok" x-cloak>
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Profile saved successfully.</span>
+            </div>
+
+            <div class="flex justify-end">
+              <button @click="saveProfile()" :disabled="profileSaving" class="btn-primary">
+                <i class="fa-solid fa-circle-notch fa-spin" x-show="profileSaving"></i>
+                <i class="fa-solid fa-floppy-disk" x-show="!profileSaving"></i>
+                <span x-text="profileSaving ? 'Saving\u2026' : 'Save Changes'"></span>
+              </button>
+            </div>
+
+          </div>
+        </div><!-- /tab: profile info -->
+
+        <!-- Tab: Security -->
+        <div class="bento-card-body" x-show="activeTab === 'security'" x-cloak>
+          <div class="space-y-4">
+
+            <!-- Current Password -->
+            <div class="space-y-1.5">
+              <label class="label-mono" for="pw-current">Current Password</label>
+              <div class="input-wrapper" :class="{ 'has-error': pwErrors.current }">
+                <input id="pw-current"
+                  :type="showCurrentPw ? 'text' : 'password'"
+                  x-model="pwForm.current"
+                  @input="pwErrors.current = ''; pwErrors._global = ''"
+                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                  autocomplete="current-password" />
+                <button type="button" class="input-icon input-icon--btn"
+                  @click="showCurrentPw = !showCurrentPw"
+                  :title="showCurrentPw ? 'Hide' : 'Show'">
+                  <i :class="showCurrentPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                </button>
+              </div>
+              <p class="field-error" x-show="pwErrors.current" x-text="pwErrors.current"></p>
+            </div>
+
+            <!-- New Password -->
+            <div class="space-y-1.5">
+              <label class="label-mono" for="pw-new">New Password</label>
+              <div class="input-wrapper" :class="{ 'has-error': pwErrors.new_ }">
+                <input id="pw-new"
+                  :type="showNewPw ? 'text' : 'password'"
+                  x-model="pwForm.new_"
+                  @input="pwErrors.new_ = ''; pwErrors._global = ''"
+                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                  autocomplete="new-password" />
+                <button type="button" class="input-icon input-icon--btn"
+                  @click="showNewPw = !showNewPw"
+                  :title="showNewPw ? 'Hide' : 'Show'">
+                  <i :class="showNewPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                </button>
+              </div>
+              <p class="field-error" x-show="pwErrors.new_" x-text="pwErrors.new_"></p>
+            </div>
+
+            <!-- Confirm New Password -->
+            <div class="space-y-1.5">
+              <label class="label-mono" for="pw-confirm">Confirm New Password</label>
+              <div class="input-wrapper" :class="{ 'has-error': pwErrors.confirm }">
+                <input id="pw-confirm"
+                  :type="showConfirmPw ? 'text' : 'password'"
+                  x-model="pwForm.confirm"
+                  @input="pwErrors.confirm = ''; pwErrors._global = ''"
+                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                  autocomplete="new-password" />
+                <button type="button" class="input-icon input-icon--btn"
+                  @click="showConfirmPw = !showConfirmPw"
+                  :title="showConfirmPw ? 'Hide' : 'Show'">
+                  <i :class="showConfirmPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                </button>
+              </div>
+              <p class="field-error" x-show="pwErrors.confirm" x-text="pwErrors.confirm"></p>
+            </div>
+
+            <!-- Global error -->
+            <div x-show="pwErrors._global" class="alert-error" x-cloak>
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span x-text="pwErrors._global"></span>
+            </div>
+
+            <!-- Success banner -->
+            <div x-show="pwSuccess" class="alert-ok" x-cloak>
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Password updated successfully.</span>
+            </div>
+
+            <div class="flex justify-end">
+              <button @click="changePassword()" :disabled="pwLoading" class="btn-primary">
+                <i class="fa-solid fa-circle-notch fa-spin" x-show="pwLoading"></i>
+                <i class="fa-solid fa-key" x-show="!pwLoading"></i>
+                <span x-text="pwLoading ? 'Updating\u2026' : 'Update Password'"></span>
+              </button>
+            </div>
+
+          </div>
+        </div><!-- /tab: security -->
+
+      </div><!-- /bento-card -->
+
+    </main>
+{{end}}
+
+{{define "scripts"}}
+  <script src="/static/js/profile.js"></script>
+{{end}}

@@ -1,0 +1,232 @@
+{{define "content"}}
+    <main class="page-container">
+
+      <!-- Page Header -->
+      <header class="mb-6">
+        <h1 class="page-title mb-1">Settings</h1>
+        <p class="body-sm font-mono">Configure integrations and inspect system health.</p>
+      </header>
+
+      <!-- Bento Grid -->
+      <div class="settings-bento">
+
+        <!-- GitHub Integration Card (spans 2 cols) -->
+        <div class="bento-card bento-card--github">
+          <div class="bento-card-header">
+            <i class="fa-brands fa-github text-[var(--text-secondary)]"></i>
+            <span class="section-title">GitHub</span>
+            <span class="ml-auto">
+              <template x-if="githubState === 'fully_connected'">
+                <span class="status-pill status-pill--ok">Connected</span>
+              </template>
+              <template x-if="githubState === 'app_created'">
+                <span class="status-pill status-pill--warn">Pending Install</span>
+              </template>
+              <template x-if="githubState === 'not_connected'">
+                <span class="status-pill status-pill--fail">Not Connected</span>
+              </template>
+            </span>
+          </div>
+          <div class="bento-card-body">
+
+            <!-- State 1: Not Connected -->
+            <template x-if="githubState === 'not_connected'">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-[var(--bg-elevated)] rounded-lg flex items-center justify-center border border-[var(--border-default)] shrink-0">
+                  <i class="fa-brands fa-github text-xl text-[var(--text-secondary)]"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="body-sm mb-4 leading-relaxed">Connect a GitHub App so Trangly can receive push webhooks and clone your repositories. One click &mdash; no copy-pasting.</p>
+                  <button @click="connectGitHub()" :disabled="githubLoading" class="btn-primary">
+                    <i class="fa-solid fa-circle-notch fa-spin" x-show="githubLoading"></i>
+                    <i class="fa-brands fa-github" x-show="!githubLoading"></i>
+                    <span x-text="githubLoading ? 'Redirecting\u2026' : 'Connect GitHub'"></span>
+                  </button>
+                </div>
+              </div>
+            </template>
+
+            <!-- State 2: App Created, Not Installed -->
+            <template x-if="githubState === 'app_created'">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-[var(--bg-elevated)] rounded-lg flex items-center justify-center border border-[var(--border-default)] shrink-0">
+                  <i class="fa-brands fa-github text-xl text-[var(--text-secondary)]"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="grid grid-cols-2 gap-x-6 gap-y-0.5 mb-4 font-mono text-xs max-w-xs">
+                    <span class="label-mono self-center">App</span>
+                    <span class="font-bold text-[var(--text-primary)]" x-text="github.app_slug || '\u2014'"></span>
+                  </div>
+                  <p class="body-sm mb-4">Install the app on your repositories to complete setup.</p>
+                  <div class="flex flex-wrap gap-3">
+                    <button @click="installOnRepos()" :disabled="githubLoading" class="btn-primary">
+                      <i class="fa-solid fa-circle-notch fa-spin" x-show="githubLoading"></i>
+                      <i class="fa-brands fa-github" x-show="!githubLoading"></i>
+                      <span x-text="githubLoading ? 'Redirecting\u2026' : 'Select Repositories'"></span>
+                    </button>
+                    <button @click="showDisconnectConfirm = true" :disabled="githubLoading" class="btn-secondary">
+                      <i class="fa-solid fa-link-slash"></i> Disconnect
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- State 3: Fully Connected -->
+            <template x-if="githubState === 'fully_connected'">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-[var(--bg-elevated)] rounded-lg flex items-center justify-center border border-[var(--border-default)] shrink-0">
+                  <i class="fa-brands fa-github text-xl text-[var(--text-secondary)]"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="grid grid-cols-2 gap-x-6 gap-y-0.5 mb-4 font-mono text-xs max-w-xs">
+                    <span class="label-mono self-center">App</span>
+                    <span class="font-bold text-[var(--text-primary)]" x-text="github.app_slug || '\u2014'"></span>
+                    <span class="label-mono self-center">Installation ID</span>
+                    <span class="text-[var(--text-primary)]" x-text="github.installation_id || '\u2014'"></span>
+                  </div>
+                  <div class="flex flex-wrap gap-3">
+                    <a :href="'https://github.com/settings/installations/' + github.installation_id"
+                       target="_blank" rel="noopener noreferrer" class="btn-secondary">
+                      <i class="fa-brands fa-github"></i>
+                      Manage on GitHub
+                    </a>
+                    <button @click="showDisconnectConfirm = true" :disabled="githubLoading" class="btn-secondary">
+                      <i class="fa-solid fa-link-slash"></i> Disconnect
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+          </div>
+        </div><!-- /github -->
+
+        <!-- Memory Card -->
+        <div class="bento-card bento-card--memory">
+          <div class="bento-card-header">
+            <i class="fa-solid fa-microchip text-[var(--text-secondary)]"></i>
+            <span class="section-title">Memory</span>
+            <template x-if="ram">
+              <span class="ml-auto font-mono text-lg font-bold text-[var(--text-primary)]">
+                <span x-text="ramPercent()"></span><span class="text-[var(--text-muted)] text-sm">%</span>
+              </span>
+            </template>
+          </div>
+          <div class="bento-card-body">
+            <template x-if="ram">
+              <div>
+                <div class="h-1.5 w-full bg-[var(--bg-highest)] rounded-full overflow-hidden mb-5">
+                  <div class="h-full transition-all duration-500 rounded-full"
+                    :style="'width:' + ramPercent() + '%; background:' + ramBarColor()"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-3 font-mono text-xs">
+                  <div>
+                    <p class="label-mono mb-0.5">Used</p>
+                    <p class="text-[var(--text-primary)] font-bold" x-text="(ram.total_mb - ram.available_mb) + ' MB'"></p>
+                  </div>
+                  <div>
+                    <p class="label-mono mb-0.5">Available</p>
+                    <p class="text-[var(--text-primary)] font-bold" x-text="ram.available_mb + ' MB'"></p>
+                  </div>
+                  <div class="col-span-2">
+                    <p class="label-mono mb-0.5">Total</p>
+                    <p class="text-[var(--text-primary)] font-bold" x-text="ram.total_mb + ' MB'"></p>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <p x-show="!ram" class="body-sm flex items-center gap-2">
+              <i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;
+            </p>
+          </div>
+        </div><!-- /memory -->
+
+        <!-- Preflight Checks (full width) -->
+        <div class="bento-card bento-card--preflight">
+          <div class="bento-card-header">
+            <i class="fa-solid fa-list-check text-[var(--text-secondary)]"></i>
+            <span class="section-title">Preflight Checks</span>
+            <template x-if="preflight.length > 0">
+              <span class="ml-auto label-mono"
+                x-text="preflight.filter(c => c.status === 'ok' || c.status === 'pass').length + ' / ' + preflight.length + ' passing'"></span>
+            </template>
+          </div>
+          <div class="bento-preflight-grid">
+            <div x-show="preflight.length === 0" class="bento-check-empty">
+              <i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;
+            </div>
+            <template x-for="(c, i) in preflight" :key="c.name">
+              <div class="bento-check-item" :class="{ 'bento-check-item--last-row': i >= preflight.length - (preflight.length % 2 === 0 ? 2 : 1) }">
+                <i class="bento-check-icon fa-solid"
+                   :class="{
+                     'fa-circle-check':         c.status === 'ok' || c.status === 'pass',
+                     'fa-triangle-exclamation': c.status === 'warn' || c.status === 'warning',
+                     'fa-circle-xmark':         c.status === 'fail' || c.status === 'error',
+                     'fa-circle-minus':         c.status !== 'ok' && c.status !== 'pass' && c.status !== 'warn' && c.status !== 'warning' && c.status !== 'fail' && c.status !== 'error',
+                     'text-[var(--color-ok)]':   c.status === 'ok' || c.status === 'pass',
+                     'text-[var(--color-warn)]': c.status === 'warn' || c.status === 'warning',
+                     'text-[var(--color-fail)]': c.status === 'fail' || c.status === 'error',
+                     'text-[var(--text-muted)]': c.status !== 'ok' && c.status !== 'pass' && c.status !== 'warn' && c.status !== 'warning' && c.status !== 'fail' && c.status !== 'error'
+                   }"></i>
+                <div class="min-w-0 flex-1">
+                  <p class="font-mono text-xs font-bold truncate" x-text="c.name"></p>
+                  <p class="font-mono text-[10px] text-[var(--text-muted)] mt-0.5" x-text="c.detail"></p>
+                  <p x-show="c.fix" class="font-mono text-[10px] text-[var(--color-warn)] mt-0.5" x-text="c.fix ? 'Fix: ' + c.fix : ''"></p>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div><!-- /preflight -->
+
+      </div><!-- /settings-bento -->
+
+    </main>
+
+    <!-- Disconnect GitHub Modal -->
+    <template x-if="showDisconnectConfirm">
+      <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+           @click.self="showDisconnectConfirm = false">
+        <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl w-full max-w-[420px] shadow-2xl">
+          <div class="px-6 pt-6 pb-4">
+            <div class="flex items-start gap-4">
+              <div class="w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center"
+                   style="background:rgba(251,191,36,0.10)">
+                <i class="fa-solid fa-triangle-exclamation text-[var(--color-warn)] text-sm"></i>
+              </div>
+              <div>
+                <h4 class="section-title mb-1">Disconnect GitHub</h4>
+                <p class="body-sm leading-relaxed">
+                  This will remove the GitHub App connection. Webhooks will stop and you won't be able to deploy until you reconnect.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="px-6 pb-4">
+            <label class="flex items-start gap-2 cursor-pointer">
+              <input type="checkbox" x-model="removeFromGitHub" class="mt-0.5 accent-white" />
+              <span class="body-sm leading-relaxed">
+                Also remove installation from GitHub
+                <span class="block text-[11px] text-[var(--text-muted)] mt-0.5">
+                  Uninstalls the app from your repositories. You can still delete the app from
+                  <a :href="'https://github.com/settings/apps/' + github.app_slug"
+                     target="_blank" rel="noopener noreferrer" class="text-[var(--accent)] underline">GitHub Settings</a>.
+                </span>
+              </span>
+            </label>
+          </div>
+          <div class="flex items-center gap-3 justify-end px-6 py-4 border-t border-[var(--border-subtle)]">
+            <button @click="showDisconnectConfirm = false" class="btn-secondary">Cancel</button>
+            <button @click="disconnectGitHub()" :disabled="githubLoading" class="btn-danger">
+              <i class="fa-solid fa-circle-notch fa-spin" x-show="githubLoading"></i>
+              <span x-text="githubLoading ? 'Disconnecting\u2026' : 'Disconnect'"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </template>
+{{end}}
+
+{{define "scripts"}}
+  <script src="/static/js/settings.js"></script>
+{{end}}

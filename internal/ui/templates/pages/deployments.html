@@ -1,0 +1,175 @@
+{{define "content"}}
+    <main class="page-container">
+
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h2 class="page-title mb-1">Deployments</h2>
+        <p class="body-sm font-mono">Global deployment history across all projects</p>
+      </div>
+
+      <!-- DataTable Toolbar -->
+      <div class="dt-toolbar">
+        <div class="dt-search">
+          <i class="fa-solid fa-magnifying-glass dt-search-icon"></i>
+          <input type="text"
+                 placeholder="Search commits, branches, projects&hellip;"
+                 :value="_searchInput"
+                 @input="onSearch($event.target.value)" />
+        </div>
+        <div class="flex-shrink-0">
+          <select class="text-xs" @change="onFilterProject($event.target.value)">
+            <option value="">All Projects</option>
+            <template x-for="p in projects" :key="p.id">
+              <option :value="p.id" x-text="p.name"></option>
+            </template>
+          </select>
+        </div>
+        <div class="flex-shrink-0">
+          <select class="text-xs" @change="onFilterStatus($event.target.value)">
+            <option value="">All Statuses</option>
+            <option value="success">Success</option>
+            <option value="failed">Failed</option>
+            <option value="running">Running</option>
+            <option value="building">Building</option>
+            <option value="pending">Pending</option>
+            <option value="held">Held</option>
+          </select>
+        </div>
+        <div class="dt-per-page">
+          <label>Show</label>
+          <select @change="onPageSize($event.target.value)">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Desktop Table -->
+      <div class="overflow-hidden border border-[var(--border-default)] rounded-lg bg-[var(--bg-surface)]">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-[var(--bg-raised)] font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+              <th class="px-5 py-3 border-b border-[var(--border-default)] dt-header"
+                  :class="{ 'dt-header--active': table.isSorted('status') }"
+                  @click="table.setSort('status')">
+                Status
+                <i class="dt-sort-icon" :class="table.isSorted('status') ? (table.sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') : 'fa-solid fa-sort'"></i>
+              </th>
+              <th class="px-5 py-3 border-b border-[var(--border-default)]">Project</th>
+              <th class="px-5 py-3 border-b border-[var(--border-default)] dt-header hidden md:table-cell"
+                  :class="{ 'dt-header--active': table.isSorted('commit_sha') }"
+                  @click="table.setSort('commit_sha')">
+                Commit
+                <i class="dt-sort-icon" :class="table.isSorted('commit_sha') ? (table.sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') : 'fa-solid fa-sort'"></i>
+              </th>
+              <th class="px-5 py-3 border-b border-[var(--border-default)] dt-header hidden lg:table-cell"
+                  :class="{ 'dt-header--active': table.isSorted('branch') }"
+                  @click="table.setSort('branch')">
+                Branch
+                <i class="dt-sort-icon" :class="table.isSorted('branch') ? (table.sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') : 'fa-solid fa-sort'"></i>
+              </th>
+              <th class="px-5 py-3 border-b border-[var(--border-default)] hidden lg:table-cell">Duration</th>
+              <th class="px-5 py-3 border-b border-[var(--border-default)] dt-header"
+                  :class="{ 'dt-header--active': table.isSorted('queued_at') }"
+                  @click="table.setSort('queued_at')">
+                Time
+                <i class="dt-sort-icon" :class="table.isSorted('queued_at') ? (table.sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') : 'fa-solid fa-sort'"></i>
+              </th>
+              <th class="px-5 py-3 border-b border-[var(--border-default)] text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="font-mono text-xs">
+            <template x-for="d in table.rows" :key="d.id">
+              <tr class="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-raised)] transition-colors cursor-pointer"
+                  @click="goToDeployment(d)">
+                <td class="px-5 py-3.5">
+                  <span class="status-pill"
+                        :class="{
+                          'status-pill--ok':   d.status === 'success',
+                          'status-pill--fail': d.status === 'failed',
+                          'status-pill--warn': d.status === 'pending' || d.status === 'held',
+                          'status-pill--run':  ['running','building','health_check','swapping'].includes(d.status),
+                          'status-pill--idle': d.status === 'idle'
+                        }"
+                        x-text="d.status"></span>
+                  <!-- Keep old badges for backward compat JS -->
+                  <span class="badge sr-only"
+                        :class="{
+                          'badge-ok': d.status === 'success',
+                          'badge-fail': d.status === 'failed',
+                          'badge-warn': d.status === 'pending' || d.status === 'held',
+                          'badge-running': ['running','building','health_check','swapping'].includes(d.status),
+                          'badge-idle': d.status === 'idle'
+                        }"
+                        x-text="d.status"></span>
+                </td>
+                <td class="px-5 py-3.5 font-bold whitespace-nowrap" x-text="d.project_name || projectName(d.project_id)"></td>
+                <td class="px-5 py-3.5 hidden md:table-cell"><code x-text="d.commit_sha?.substring(0, 7)"></code></td>
+                <td class="px-5 py-3.5 text-[var(--text-muted)] hidden lg:table-cell" x-text="d.branch"></td>
+                <td class="px-5 py-3.5 text-[var(--text-muted)] hidden lg:table-cell" x-text="duration(d.started_at, d.finished_at)"></td>
+                <td class="px-5 py-3.5 text-[var(--text-muted)]"
+                    :title="d.queued_at ? new Date(d.queued_at).toLocaleString() : ''"
+                    x-text="timeAgo(d.finished_at || d.queued_at)"></td>
+                <td class="px-5 py-3.5 text-right">
+                  <button @click.stop="goToDeployment(d)" class="btn-secondary text-xs px-3 h-7">View</button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Loading -->
+      <div x-show="table.loading && table.rows.length === 0" class="text-center py-16">
+        <i class="fa-solid fa-circle-notch fa-spin text-xl text-[var(--text-muted)]"></i>
+      </div>
+
+      <!-- Empty State -->
+      <div x-show="!table.loading && table.rows.length === 0" class="empty-state">
+        <div class="empty-state-icon">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <h3 class="empty-state-title">No deployments found</h3>
+        <p class="empty-state-body">Deploy a project to see deployment history here.</p>
+      </div>
+
+      <!-- Pagination Bar -->
+      <div x-show="table.total > 0" class="dt-pagination">
+        <div class="dt-pagination-info">
+          Showing <span x-text="table.showingFrom"></span>&ndash;<span x-text="table.showingTo"></span>
+          of <span x-text="table.total"></span>
+        </div>
+        <div class="dt-pagination-controls">
+          <button class="dt-page-btn" :disabled="!table.hasPrev" @click="table.setPage(1)" title="First page">
+            <i class="fa-solid fa-angles-left text-xs"></i>
+          </button>
+          <button class="dt-page-btn" :disabled="!table.hasPrev" @click="table.prevPage()" title="Previous page">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+          <template x-for="pg in table.pageRange" :key="'pg-'+pg+'-'+Math.random()">
+            <span>
+              <span x-show="pg === '...'" class="dt-page-ellipsis">&hellip;</span>
+              <button x-show="pg !== '...'"
+                      class="dt-page-btn"
+                      :class="{ 'dt-page-btn--active': pg === table.page }"
+                      @click="table.setPage(pg)"
+                      x-text="pg"></button>
+            </span>
+          </template>
+          <button class="dt-page-btn" :disabled="!table.hasNext" @click="table.nextPage()" title="Next page">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+          <button class="dt-page-btn" :disabled="!table.hasNext" @click="table.setPage(table.totalPages)" title="Last page">
+            <i class="fa-solid fa-angles-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+    </main>
+{{end}}
+
+{{define "scripts"}}
+  <script src="/static/js/deployments.js"></script>
+{{end}}
