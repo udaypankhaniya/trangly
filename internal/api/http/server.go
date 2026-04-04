@@ -103,7 +103,7 @@ func NewServer(cfg Config) *Server {
 	authh := handlers.NewAuthHandler(cfg.AuthSvc)
 	ghh := handlers.NewGitHubHandler(cfg.GHAuthSvc, cfg.BaseURL)
 	prjh := handlers.NewProjectHandler(cfg.ProjectSvc, cfg.DeploySvc, cfg.GHAuthSvc)
-	deph := handlers.NewDeployHandler(cfg.DeploySvc, cfg.Broadcaster)
+	deph := handlers.NewDeployHandler(cfg.DeploySvc, cfg.ProjectSvc, cfg.Broadcaster)
 	queueh := handlers.NewQueueHandler(cfg.DeploySvc, cfg.QueueMgr)
 	eventh := handlers.NewEventsHandler(cfg.DeploySvc, cfg.Broadcaster)
 
@@ -153,6 +153,7 @@ func NewServer(cfg Config) *Server {
 	fiberApp.Post("/api/projects/:id/deploy", authMW, deph.TriggerDeploy)
 	fiberApp.Get("/api/deployments", authMW, deph.ListDeployments)
 	fiberApp.Get("/api/deployments/:id/logs", authMW, deph.StreamLogs)
+	fiberApp.Get("/api/deployments/:id", authMW, deph.GetDeployment)
 
 	fiberApp.Get("/api/queue", authMW, queueh.List)
 	fiberApp.Delete("/api/queue/:job_id", authMW, queueh.Cancel)

@@ -9,18 +9,48 @@ import (
 
 	"github.com/udaypankhaniya/trangly/internal/api/sse"
 	"github.com/udaypankhaniya/trangly/internal/app"
+	"github.com/udaypankhaniya/trangly/internal/domain"
 	"github.com/udaypankhaniya/trangly/internal/infra/db"
 )
 
 // DeployHandler handles deployment endpoints.
 type DeployHandler struct {
 	deploySvc   *app.DeployService
+	projectSvc  *app.ProjectService
 	broadcaster *sse.Broadcaster
 }
 
 // NewDeployHandler creates a DeployHandler.
-func NewDeployHandler(deploySvc *app.DeployService, broadcaster *sse.Broadcaster) *DeployHandler {
-	return &DeployHandler{deploySvc: deploySvc, broadcaster: broadcaster}
+func NewDeployHandler(deploySvc *app.DeployService, projectSvc *app.ProjectService, broadcaster *sse.Broadcaster) *DeployHandler {
+	return &DeployHandler{deploySvc: deploySvc, projectSvc: projectSvc, broadcaster: broadcaster}
+}
+
+// GetDeployment handles GET /api/deployments/:id.
+func (h *DeployHandler) GetDeployment(c *fiber.Ctx) error {
+	id := c.Params("id")
+	if id == "" {
+		return respondError(c, fiber.StatusBadRequest, "missing deployment ID")
+	}
+	job, err := h.deploySvc.GetJob(id)
+	if errors.Is(err, app.ErrNotFound) {
+		return respondError(c, fiber.StatusNotFound, "deployment not found")
+	}
+	if err != nil {
+		return respondError(c, fiber.StatusInternalServerError, err.Error())
+	}
+
+	type deploymentDetail struct {
+		*domain.DeployJob
+		RepoFullName string `json:"repo_full_name"`
+		DeployMode   string `json:"deploy_mode"`
+	}
+	dd := deploymentDetail{DeployJob: job}
+	if project, err := h.projectSvc.GetByID(job.ProjectID); err == nil {
+		dd.ProjectName = project.Name
+		dd.RepoFullName = project.RepoFullName
+		dd.DeployMode = project.DeployMode
+	}
+	return respondJSON(c, fiber.StatusOK, dd)
 }
 
 // TriggerDeploy handles POST /api/projects/:id/deploy.

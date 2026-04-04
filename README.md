@@ -126,7 +126,7 @@ No downtime. No container restart. Updated files land in the running container d
 
 **One-liner (Debian / Ubuntu / RHEL / Fedora / Alpine):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/udaypankhaniya/trangly/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/udaypankhaniya/trangly/master/scripts/install.sh | sh
 ```
 
 **Or download a package directly from the [v0.1.0 release](https://github.com/udaypankhaniya/trangly/releases/tag/v0.1.0):**

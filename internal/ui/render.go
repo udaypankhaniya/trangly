@@ -73,6 +73,7 @@ func NewRenderer(embeddedFS embed.FS) *Renderer {
 		"project":      "templates/pages/project.html",
 		"project_edit": "templates/pages/project_edit.html",
 		"deployments":  "templates/pages/deployments.html",
+		"deployment":   "templates/pages/deployment.html",
 	}
 	for name, path := range appPages {
 		cloned, err := baseSet.Clone()

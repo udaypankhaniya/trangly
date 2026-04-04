@@ -60,6 +60,9 @@ func RegisterRoutes(app *fiber.App) {
 	app.Get("/deployments", serveProtectedPage("deployments", "/deployments", PageData{
 		Title: "Deployments", ActiveNav: "deployments", AlpineData: "deploymentsPage()",
 	}))
+	app.Get("/deployment", serveProtectedPage("deployment", "/deployment", PageData{
+		Title: "Deployment", ActiveNav: "deployments", AlpineData: "deploymentPage()",
+	}))
 
 	// Catch-all: anything that doesn't match above → redirect to /dashboard.
 	app.Use(func(c *fiber.Ctx) error {

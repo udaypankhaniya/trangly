@@ -75,7 +75,7 @@ class DeploymentsPage {
   }
 
   goToDeployment(d) {
-    window.location.href = '/project?id=' + d.project_id;
+    window.location.href = '/deployment?id=' + d.id;
   }
 
   timeAgo(d) { return timeAgo(d); }

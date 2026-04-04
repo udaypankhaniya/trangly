@@ -1,0 +1,154 @@
+{{define "content"}}
+    <!-- Loading State -->
+    <div x-show="!deployment && !loadError" class="flex-1 flex items-center justify-center">
+      <i class="fa-solid fa-circle-notch fa-spin text-xl text-[var(--text-muted)]"></i>
+    </div>
+
+    <!-- Error State -->
+    <div x-show="loadError" class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <i class="fa-solid fa-circle-exclamation text-4xl text-[var(--color-fail)] mb-4 block"></i>
+        <h3 class="text-sm font-bold mb-2" x-text="loadError"></h3>
+        <a href="/deployments" class="text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] underline">Back to Deployments</a>
+      </div>
+    </div>
+
+    <!-- Deployment Content -->
+    <template x-if="deployment">
+      <main class="page-container">
+
+        <!-- Back Link -->
+        <div class="mb-3">
+          <a href="/deployments" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest">
+            <i class="fa-solid fa-arrow-left text-xs"></i> Deployments
+          </a>
+        </div>
+
+        <!-- Deployment Header -->
+        <section class="mb-8">
+          <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-l-4 border-[var(--accent)] pl-5 py-2">
+            <div>
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <h1 class="text-2xl font-bold tracking-tight uppercase" x-text="deployment.project_name || 'Deployment'"></h1>
+                <span class="status-pill"
+                      :class="{
+                        'status-pill--ok':   deployment.status === 'success',
+                        'status-pill--fail': deployment.status === 'failed',
+                        'status-pill--warn': deployment.status === 'pending' || deployment.status === 'held',
+                        'status-pill--run':  ['running','building','health_check','swapping','hot_swapping'].includes(deployment.status),
+                        'status-pill--idle': deployment.status === 'idle'
+                      }"
+                      x-text="deployment.status"></span>
+                <span x-show="deployment.deploy_mode === 'hot_swap'"
+                      class="px-2 py-0.5 bg-purple-500/15 text-purple-400 text-[10px] font-mono border border-purple-500/30 uppercase tracking-widest">
+                  Hot Swap
+                </span>
+              </div>
+              <div class="flex flex-wrap items-center gap-4 text-[var(--text-muted)]">
+                <div class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-code-commit text-xs"></i>
+                  <span class="font-mono text-xs" x-text="deployment.commit_sha?.substring(0, 7)"></span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-code-branch text-xs"></i>
+                  <span class="font-mono text-xs" x-text="deployment.branch"></span>
+                </div>
+                <template x-if="deployment.repo_full_name">
+                  <div class="flex items-center gap-1.5">
+                    <i class="fa-brands fa-github text-xs"></i>
+                    <span class="font-mono text-xs truncate max-w-[200px]" x-text="deployment.repo_full_name"></span>
+                  </div>
+                </template>
+                <div class="flex items-center gap-1.5">
+                  <i class="fa-regular fa-clock text-xs"></i>
+                  <span class="font-mono text-xs" x-text="timeAgo(deployment.finished_at || deployment.queued_at)"></span>
+                </div>
+                <template x-if="deployment.started_at && deployment.finished_at">
+                  <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-stopwatch text-xs"></i>
+                    <span class="font-mono text-xs" x-text="duration(deployment.started_at, deployment.finished_at)"></span>
+                  </div>
+                </template>
+              </div>
+              <template x-if="deployment.error">
+                <div class="mt-2 text-xs font-mono text-[var(--color-fail)] truncate max-w-[500px]" x-text="deployment.error"></div>
+              </template>
+            </div>
+            <a :href="'/project?id=' + deployment.project_id" class="btn-secondary self-start sm:self-auto shrink-0 text-xs">
+              <i class="fa-solid fa-folder text-xs"></i> View Project
+            </a>
+          </div>
+        </section>
+
+        <!-- Pipeline + Logs -->
+        <section>
+          <div class="flex flex-col lg:flex-row gap-4 lg:gap-5">
+
+            <!-- LEFT: Pipeline Sidebar -->
+            <aside class="flex-none lg:w-48 order-2 lg:order-1">
+              <div class="label-mono mb-2 hidden lg:block">Pipeline</div>
+              <nav class="ps-sidebar">
+                <template x-for="phase in pipelinePhases" :key="phase">
+                  <button class="ps-step" :class="pipelineStepClass(phase)" @click="selectPhase(phase)">
+                    <span class="ps-step-icon">
+                      <i :class="{
+                        'fa-solid fa-circle-check':               phaseState(phase) === 'done',
+                        'fa-solid fa-circle-xmark':               phaseState(phase) === 'active' && deployment?.status === 'failed',
+                        'fa-solid fa-circle-notch fa-spin':       phaseState(phase) === 'active' && deployment?.status !== 'failed',
+                        'fa-regular fa-circle opacity-40':        phaseState(phase) !== 'done' && phaseState(phase) !== 'active'
+                      }"></i>
+                    </span>
+                    <span class="ps-step-body">
+                      <span class="ps-step-label" x-text="phase.replace(/_/g,' ')"></span>
+                      <span class="ps-step-meta"
+                            x-text="phaseState(phase) === 'done' ? 'done' : phaseState(phase) === 'active' ? (deployment?.status === 'failed' ? 'failed' : 'running') : 'pending'"
+                      ></span>
+                    </span>
+                  </button>
+                </template>
+              </nav>
+              <!-- Commit meta (desktop only) -->
+              <template x-if="deployment.commit_sha">
+                <div class="mt-4 pt-4 border-t border-[var(--border-subtle)] hidden lg:block space-y-1">
+                  <div class="label-mono">Commit</div>
+                  <div class="font-mono text-xs" x-text="deployment.commit_sha?.substring(0,7)"></div>
+                  <div class="font-mono text-[10px] text-[var(--text-muted)] truncate" x-text="deployment.branch"></div>
+                </div>
+              </template>
+            </aside>
+
+            <!-- RIGHT: Log Viewer -->
+            <div class="flex-1 min-w-0 order-1 lg:order-2">
+              <div class="flex items-center justify-between mb-2">
+                <span class="label-mono">Output</span>
+                <template x-if="['running','building','health_check','swapping','hot_swapping'].includes(deployment?.status || '')">
+                  <div class="flex items-center gap-1.5">
+                    <span class="inline-block w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-yellow-400">Live</span>
+                  </div>
+                </template>
+              </div>
+              <div id="log-output" class="log-viewer h-[340px] sm:h-[420px] lg:h-[540px] log-scroll">
+                <template x-for="(line, idx) in logLines" :key="idx">
+                  <div class="log-line flex gap-3 lg:gap-4 mb-1">
+                    <span class="log-line-num text-[11px] lg:text-xs" x-text="idx + 1"></span>
+                    <span class="whitespace-pre-wrap break-all text-[12px] lg:text-[13px]" x-text="line"></span>
+                  </div>
+                </template>
+                <div x-show="logLines.length === 0" class="text-[var(--text-muted)] text-center py-12 lg:py-16">
+                  <i class="fa-solid fa-terminal text-3xl mb-2 block"></i>
+                  <p class="font-mono text-xs">No logs available for this deployment.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </template>
+{{end}}
+
+{{define "scripts"}}
+  <script src="/static/js/deployment.js"></script>
+{{end}}

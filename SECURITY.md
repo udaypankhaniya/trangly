@@ -10,7 +10,20 @@
 
 ---
 
+## Reporting a Vulnerability
 
+**Please do not open a public GitHub issue for security vulnerabilities.**
+
+
+Include:
+- Description of the vulnerability
+- Steps to reproduce (proof of concept if possible)
+- Affected version(s)
+- Your assessment of severity and impact
+
+You will receive an acknowledgement within **48 hours** and a resolution timeline within **7 days**.
+
+---
 
 ## Scope
 
