@@ -129,35 +129,35 @@ No downtime. No container restart. Updated files land in the running container d
 curl -fsSL https://raw.githubusercontent.com/udaypankhaniya/trangly/master/scripts/install.sh | sh
 ```
 
-**Or download a package directly from the [v0.1.0 release](https://github.com/udaypankhaniya/trangly/releases/tag/v0.1.0):**
+**Or download a package directly from the [v0.1.1 release](https://github.com/udaypankhaniya/trangly/releases/tag/v0.1.1):**
 
 | Platform | Architecture | Download |
 |---|---|---|
-| Debian / Ubuntu | amd64 | [trangly_0.1.0_amd64.deb](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly_0.1.0_amd64.deb) |
-| Debian / Ubuntu | arm64 | [trangly_0.1.0_arm64.deb](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly_0.1.0_arm64.deb) |
-| RHEL / Fedora / CentOS | amd64 | [trangly-0.1.0-1.x86_64.rpm](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly-0.1.0-1.x86_64.rpm) |
-| RHEL / Fedora / CentOS | arm64 | [trangly-0.1.0-1.aarch64.rpm](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly-0.1.0-1.aarch64.rpm) |
-| Linux (raw binary) | amd64 | [trangly-linux-amd64](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly-linux-amd64) |
-| Linux (raw binary) | arm64 | [trangly-linux-arm64](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly-linux-arm64) |
-| Windows | amd64 | [trangly-windows-amd64-v0.1.0.zip](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly-windows-amd64-v0.1.0.zip) |
-| Windows | arm64 | [trangly-windows-arm64-v0.1.0.zip](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly-windows-arm64-v0.1.0.zip) |
+| Debian / Ubuntu | amd64 | [trangly_0.1.1_amd64.deb](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly_0.1.1_amd64.deb) |
+| Debian / Ubuntu | arm64 | [trangly_0.1.1_arm64.deb](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly_0.1.1_arm64.deb) |
+| RHEL / Fedora / CentOS | amd64 | [trangly-0.1.1-1.x86_64.rpm](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly-0.1.1-1.x86_64.rpm) |
+| RHEL / Fedora / CentOS | arm64 | [trangly-0.1.1-1.aarch64.rpm](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly-0.1.1-1.aarch64.rpm) |
+| Linux (raw binary) | amd64 | [trangly-linux-amd64](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly-linux-amd64) |
+| Linux (raw binary) | arm64 | [trangly-linux-arm64](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly-linux-arm64) |
+| Windows | amd64 | [trangly-windows-amd64-v0.1.1.zip](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly-windows-amd64-v0.1.1.zip) |
+| Windows | arm64 | [trangly-windows-arm64-v0.1.1.zip](https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly-windows-arm64-v0.1.1.zip) |
 
 ```bash
 # Debian / Ubuntu — amd64
-curl -LO https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly_0.1.0_amd64.deb
-sudo dpkg -i trangly_0.1.0_amd64.deb
+curl -LO https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly_0.1.1_amd64.deb
+sudo dpkg -i trangly_0.1.1_amd64.deb
 
 # Debian / Ubuntu — arm64
-curl -LO https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly_0.1.0_arm64.deb
-sudo dpkg -i trangly_0.1.0_arm64.deb
+curl -LO https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly_0.1.1_arm64.deb
+sudo dpkg -i trangly_0.1.1_arm64.deb
 
 # RHEL / Fedora / CentOS — amd64
-curl -LO https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly-0.1.0-1.x86_64.rpm
-sudo rpm -U trangly-0.1.0-1.x86_64.rpm
+curl -LO https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly-0.1.1-1.x86_64.rpm
+sudo rpm -U trangly-0.1.1-1.x86_64.rpm
 
 # RHEL / Fedora / CentOS — arm64
-curl -LO https://github.com/udaypankhaniya/trangly/releases/download/v0.1.0/trangly-0.1.0-1.aarch64.rpm
-sudo rpm -U trangly-0.1.0-1.aarch64.rpm
+curl -LO https://github.com/udaypankhaniya/trangly/releases/download/v0.1.1/trangly-0.1.1-1.aarch64.rpm
+sudo rpm -U trangly-0.1.1-1.aarch64.rpm
 ```
 
 ### 2. Run setup
