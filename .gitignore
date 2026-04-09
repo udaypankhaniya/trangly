@@ -7,6 +7,8 @@ dist/
 !internal/ui/static/dist/
 !internal/ui/static/dist/style.min.css
 
+docker-compose.yml
+Dockerfile
 # Coverage
 coverage.out
 coverage.html
