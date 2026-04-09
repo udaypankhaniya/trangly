@@ -143,13 +143,13 @@ class SettingsPage {
 
   preflightIcon(status) {
     const map = {
-      ok:   { icon: 'fa-circle-check',           color: 'var(--color-ok)' },
-      warn: { icon: 'fa-triangle-exclamation',    color: 'var(--color-warn)' },
-      fail: { icon: 'fa-circle-xmark',            color: 'var(--color-fail)' },
-      skip: { icon: 'fa-circle-minus',            color: 'var(--text-muted)' },
+      ok:   { icon: 'circle-check',        color: 'var(--color-ok)' },
+      warn: { icon: 'triangle-exclamation', color: 'var(--color-warn)' },
+      fail: { icon: 'circle-xmark',         color: 'var(--color-fail)' },
+      skip: { icon: 'circle-minus',         color: 'var(--text-muted)' },
     };
     const m = map[status] || map.skip;
-    return 'fa-solid ' + m.icon + '" style="color:' + m.color;
+    return m.icon + '" style="color:' + m.color;
   }
 
   preflightBadgeClass(status) {

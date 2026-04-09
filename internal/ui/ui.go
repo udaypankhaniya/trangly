@@ -32,6 +32,13 @@ func RegisterRoutes(app *fiber.App) {
 	// Parse all templates once at startup.
 	renderer = NewRenderer(embeddedFiles)
 
+	// Cache-Control for static assets: allow clients and proxies to cache for 1 hour.
+	// Assets are not content-hashed yet; 3600s is a safe conservative value.
+	app.Use("/static", func(c *fiber.Ctx) error {
+		c.Set("Cache-Control", "public, max-age=3600")
+		return c.Next()
+	})
+
 	// Static assets served via filesystem middleware.
 	app.Use("/static", filesystem.New(filesystem.Config{
 		Root:       http.FS(embeddedFiles),

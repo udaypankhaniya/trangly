@@ -1,13 +1,13 @@
 {{define "content"}}
     <!-- Loading State -->
     <div x-show="!project && !loadError" class="flex-1 flex items-center justify-center">
-      <i class="fa-solid fa-circle-notch fa-spin text-xl text-[var(--text-muted)]"></i>
+      <svg class="icon icon-spin text-xl text-[var(--text-muted)]" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
     </div>
 
     <!-- Error State -->
     <div x-show="loadError" class="flex-1 flex items-center justify-center">
       <div class="text-center">
-        <i class="fa-solid fa-circle-exclamation text-4xl text-[var(--color-fail)] mb-4 block"></i>
+        <svg class="icon text-4xl text-[var(--color-fail)] mb-4 block" aria-hidden="true"><use href="#icon-circle-exclamation"></use></svg>
         <h3 class="text-sm font-bold mb-2" x-text="loadError"></h3>
         <a href="/dashboard" class="text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] underline">Back to Dashboard</a>
       </div>
@@ -20,7 +20,7 @@
         <!-- Back + Deployment Header -->
         <div class="mb-3">
           <a href="/dashboard" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest">
-            <i class="fa-solid fa-arrow-left text-xs"></i> Dashboard
+            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-arrow-left"></use></svg> Dashboard
           </a>
         </div>
 
@@ -38,16 +38,15 @@
               </div>
               <div class="flex flex-wrap items-center gap-4 text-[var(--text-muted)]">
                 <div class="flex items-center gap-1.5">
-                  <i class="fa-solid fa-code-branch text-xs"></i>
+                  <svg class="icon text-xs" aria-hidden="true"><use href="#icon-code-branch"></use></svg>
                   <span class="font-mono text-xs" x-text="project.default_branch"></span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <i class="fa-brands fa-github text-xs"></i>
-                  <span class="font-mono text-xs truncate max-w-[200px]" x-text="project.repo_full_name"></span>
+                  <svg class="icon text-xs" aria-hidden="true"><use href="#icon-github"></use></svg>
                 </div>
                 <template x-if="job">
                   <div class="flex items-center gap-1.5">
-                    <i class="fa-solid fa-code-commit text-xs"></i>
+                    <svg class="icon text-xs" aria-hidden="true"><use href="#icon-code-commit"></use></svg>
                     <span class="font-mono text-xs" x-text="job.commit_sha?.substring(0, 7)"></span>
                   </div>
                 </template>
@@ -56,12 +55,12 @@
             <template x-if="!job || ['success','failed'].includes(job.status)">
               <button @click="triggerDeploy()"
                       class="btn-primary self-start sm:self-auto shrink-0">
-                <i class="fa-solid fa-rocket text-xs"></i> Deploy Now
+                <svg class="icon text-xs" aria-hidden="true"><use href="#icon-rocket"></use></svg> Deploy Now
               </button>
             </template>
             <template x-if="job && !['success','failed'].includes(job.status)">
               <div class="btn-secondary self-start sm:self-auto shrink-0 cursor-default">
-                <i class="fa-solid fa-circle-notch fa-spin text-xs"></i> Deploying...
+                <svg class="icon icon-spin text-xs" aria-hidden="true"><use href="#icon-circle-notch"></use></svg> Deploying...
               </div>
             </template>
           </div>
@@ -84,12 +83,10 @@
                 <template x-for="phase in pipelinePhases" :key="phase">
                   <button class="ps-step" :class="pipelineStepClass(phase)" @click="selectPhase(phase)">
                     <span class="ps-step-icon">
-                      <i :class="{
-                        'fa-solid fa-circle-check':               phaseState(phase) === 'done',
-                        'fa-solid fa-circle-xmark':               phaseState(phase) === 'active' && job?.status === 'failed',
-                        'fa-solid fa-circle-notch fa-spin':       phaseState(phase) === 'active' && job?.status !== 'failed',
-                        'fa-regular fa-circle opacity-40':        phaseState(phase) !== 'done' && phaseState(phase) !== 'active'
-                      }"></i>
+                      <svg class="icon" x-show="phaseState(phase) === 'done'" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
+                      <svg class="icon" x-show="phaseState(phase) === 'active' && job?.status === 'failed'" aria-hidden="true"><use href="#icon-circle-xmark"></use></svg>
+                      <svg class="icon icon-spin" x-show="phaseState(phase) === 'active' && job?.status !== 'failed'" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                      <svg class="icon" style="opacity:0.4" x-show="phaseState(phase) !== 'done' && phaseState(phase) !== 'active'" aria-hidden="true"><use href="#icon-circle"></use></svg>
                     </span>
                     <span class="ps-step-body">
                       <span class="ps-step-label" x-text="phase.replace(/_/g,' ')"></span>
@@ -129,7 +126,7 @@
                   </div>
                 </template>
                 <div x-show="logLines.length === 0" class="text-[var(--text-muted)] text-center py-12 lg:py-16">
-                  <i class="fa-solid fa-terminal text-3xl mb-2 block"></i>
+                  <svg class="icon text-3xl mb-2 block" aria-hidden="true"><use href="#icon-terminal"></use></svg>
                   <p class="font-mono text-xs">No logs yet. Trigger a deploy to see output.</p>
                 </div>
               </div>
@@ -143,13 +140,11 @@
           <div class="space-y-2">
             <template x-for="h in history" :key="h.id">
               <div class="flex items-center gap-4 p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-[var(--border-strong)] transition-all">
-                <i class="text-lg shrink-0" :class="{
-                  'fa-solid fa-circle-check text-[var(--color-ok)]':   h.status === 'success',
-                  'fa-solid fa-circle-xmark text-[var(--color-fail)]': h.status === 'failed',
-                  'fa-solid fa-clock text-[var(--color-warn)]':        h.status === 'pending' || h.status === 'held',
-                  'fa-solid fa-circle-notch fa-spin text-[var(--color-info)]': ['running','building','health_check','swapping'].includes(h.status),
-                  'fa-regular fa-circle text-[var(--text-muted)]':     !['success','failed','pending','held','running','building','health_check','swapping'].includes(h.status)
-                }"></i>
+                <svg class="icon text-lg shrink-0 text-[var(--color-ok)]" x-show="h.status === 'success'" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
+                <svg class="icon text-lg shrink-0 text-[var(--color-fail)]" x-show="h.status === 'failed'" aria-hidden="true"><use href="#icon-circle-xmark"></use></svg>
+                <svg class="icon text-lg shrink-0 text-[var(--color-warn)]" x-show="h.status === 'pending' || h.status === 'held'" aria-hidden="true"><use href="#icon-clock"></use></svg>
+                <svg class="icon icon-spin text-lg shrink-0 text-[var(--color-info)]" x-show="['running','building','health_check','swapping'].includes(h.status)" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                <svg class="icon text-lg shrink-0 text-[var(--text-muted)]" x-show="!['success','failed','pending','held','running','building','health_check','swapping'].includes(h.status)" aria-hidden="true"><use href="#icon-circle"></use></svg>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 text-xs font-mono">
                     <code x-text="h.commit_sha?.substring(0, 7)"></code>
@@ -171,7 +166,7 @@
                 <a :href="'https://github.com/' + project.repo_full_name + '/commit/' + h.commit_sha"
                    target="_blank" rel="noopener"
                    class="btn-ghost px-2" title="View on GitHub">
-                  <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                  <svg class="icon text-xs" aria-hidden="true"><use href="#icon-arrow-up-right-from-square"></use></svg>
                 </a>
                 <button @click="redeploy(h)" class="btn-secondary text-xs px-3 h-7 shrink-0">Redeploy</button>
               </div>
@@ -181,7 +176,7 @@
           <!-- Empty State -->
           <div x-show="!historyLoading && history.length === 0" class="empty-state">
             <div class="empty-state-icon">
-              <i class="fa-solid fa-clock-rotate-left"></i>
+              <svg class="icon" aria-hidden="true"><use href="#icon-clock-rotate-left"></use></svg>
             </div>
             <h3 class="empty-state-title">No deployment history yet</h3>
           </div>
@@ -190,14 +185,14 @@
           <div x-show="historyHasMore" class="text-center pt-6">
             <button @click="loadHistory(true)" :disabled="historyLoading"
                     class="btn-ghost text-xs font-mono inline-flex items-center gap-2">
-              <i class="fa-solid fa-circle-notch fa-spin text-xs" x-show="historyLoading"></i>
+              <svg class="icon icon-spin text-xs" x-show="historyLoading" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
               Load More
             </button>
           </div>
 
           <!-- Loading -->
           <div x-show="historyLoading && history.length === 0" class="text-center py-12">
-            <i class="fa-solid fa-circle-notch fa-spin text-xl text-[var(--text-muted)]"></i>
+            <svg class="icon icon-spin text-xl text-[var(--text-muted)]" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
           </div>
         </section>
 
@@ -206,7 +201,7 @@
           <div class="bg-[var(--bg-surface)] p-4 border border-[var(--border-default)] rounded-lg">
             <div class="flex items-center justify-between mb-3">
               <span class="label-mono">Branch</span>
-              <i class="fa-solid fa-code-branch text-xs text-[var(--text-muted)]"></i>
+              <svg class="icon text-xs text-[var(--text-muted)]" aria-hidden="true"><use href="#icon-code-branch"></use></svg>
             </div>
             <div class="font-mono text-sm mb-1" x-text="project.default_branch"></div>
             <div class="label-mono text-[9px]" x-text="project.compose_path || 'docker-compose.yml'"></div>
@@ -214,7 +209,7 @@
           <div class="bg-[var(--bg-surface)] p-4 border border-[var(--border-default)] rounded-lg">
             <div class="flex items-center justify-between mb-3">
               <span class="label-mono">Memory</span>
-              <i class="fa-solid fa-microchip text-xs text-[var(--text-muted)]"></i>
+              <svg class="icon text-xs text-[var(--text-muted)]" aria-hidden="true"><use href="#icon-microchip"></use></svg>
             </div>
             <div class="font-mono text-sm mb-1" x-text="project.mem_limit_mb > 0 ? project.mem_limit_mb + ' MB' : 'Auto'"></div>
             <div class="label-mono text-[9px]">Allocation limit</div>
@@ -222,12 +217,12 @@
           <div class="bg-[var(--bg-surface)] p-4 border border-[var(--border-default)] rounded-lg">
             <div class="flex items-center justify-between mb-3">
               <span class="label-mono">Repository</span>
-              <i class="fa-brands fa-github text-xs text-[var(--text-muted)]"></i>
+              <svg class="icon text-xs text-[var(--text-muted)]" aria-hidden="true"><use href="#icon-github"></use></svg>
             </div>
             <div class="font-mono text-sm tracking-tight mb-1 truncate" x-text="project.repo_full_name"></div>
             <a :href="'https://github.com/' + project.repo_full_name" target="_blank" rel="noopener"
                class="text-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] font-mono uppercase transition-colors inline-flex items-center gap-1">
-              View on GitHub <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+              View on GitHub <svg class="icon" style="font-size:9px" aria-hidden="true"><use href="#icon-arrow-up-right-from-square"></use></svg>
             </a>
           </div>
         </section>

@@ -2,6 +2,8 @@ BINARY     := trangly
 BUILD_DIR  := dist
 CMD        := ./cmd/trangly
 PKG        := github.com/udaypankhaniya/trangly/pkg/version
+CSS_INPUT  := internal/ui/static/style.css
+CSS_OUTPUT := internal/ui/static/dist/style.min.css
 
 ## Version variables injected via ldflags at build time.
 VERSION    := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -12,7 +14,16 @@ LDFLAGS    := -s -w \
               -X $(PKG).Commit=$(COMMIT) \
               -X $(PKG).BuildDate=$(DATE)
 
-.PHONY: build run setup test lint sqlc clean install uninstall reset release windows deb rpm apk packages
+.PHONY: build run setup test lint sqlc clean install uninstall reset release windows deb rpm apk packages css icons
+
+## Fetch Lucide SVG icons and rebuild the embedded SVG sprite (requires Bun).
+icons:
+	bun run scripts/build-icons.mjs
+
+## Recompile and minify Tailwind CSS (only needed when adding new utility classes).
+## Requires Bun: run `bun install` first, then commit dist/style.min.css.
+css:
+	bunx tailwindcss -i $(CSS_INPUT) -o $(CSS_OUTPUT) --minify
 
 ## Build the binary for the current platform.
 build:

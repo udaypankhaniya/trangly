@@ -16,14 +16,11 @@ func Security() fiber.Handler {
 	// CSP is built once at startup; it never changes.
 	csp := "default-src 'none'; " +
 		// Alpine.js v3 requires 'unsafe-eval' for x-data expression parsing.
-		// Tailwind CDN also requires 'unsafe-eval' for JIT compilation.
-		"script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
-		"https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; " +
-		"style-src 'self' 'unsafe-inline' " +
-		"https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://cdn.tailwindcss.com; " +
-		"font-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
+		"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; " +
+		"style-src 'self' 'unsafe-inline'; " +
+		"font-src 'self'; " +
 		"img-src 'self' data:; " +
-		"connect-src 'self' https://cdn.jsdelivr.net; " +
+		"connect-src 'self'; " +
 		"frame-ancestors 'none';"
 
 	return func(c *fiber.Ctx) error {

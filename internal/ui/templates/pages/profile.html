@@ -4,7 +4,7 @@
       <!-- Page Header -->
       <header class="mb-6 flex items-center gap-4">
         <a href="/settings" class="btn-ghost px-2 -ml-2" title="Back to Settings">
-          <i class="fa-solid fa-arrow-left"></i>
+        <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
         </a>
         <div>
           <h1 class="page-title mb-1">Edit Profile</h1>
@@ -17,10 +17,10 @@
         <!-- Tab Bar -->
         <div class="tab-bar px-5">
           <button @click="activeTab = 'info'" class="tab-item" :class="{ 'active': activeTab === 'info' }">
-            <i class="fa-solid fa-circle-user mr-1.5"></i>Profile
+            <svg class="icon mr-1.5" aria-hidden="true"><use href="#icon-circle-user"></use></svg>Profile
           </button>
           <button @click="activeTab = 'security'" class="tab-item" :class="{ 'active': activeTab === 'security' }">
-            <i class="fa-solid fa-lock mr-1.5"></i>Security
+            <svg class="icon mr-1.5" aria-hidden="true"><use href="#icon-lock"></use></svg>Security
           </button>
         </div>
 
@@ -35,7 +35,7 @@
                 <input id="prof-username" type="text" x-model="profile.username"
                   @input="profileErrors.username = ''; profileErrors._global = ''"
                   placeholder="your-username" autocomplete="username" />
-                <span class="input-icon"><i class="fa-solid fa-user"></i></span>
+                <span class="input-icon"><svg class="icon" aria-hidden="true"><use href="#icon-user"></use></svg></span>
               </div>
               <p class="field-error" x-show="profileErrors.username" x-text="profileErrors.username"></p>
             </div>
@@ -47,26 +47,26 @@
                 <input id="prof-email" type="email" x-model="profile.email"
                   @input="profileErrors._global = ''"
                   placeholder="you@example.com" autocomplete="email" />
-                <span class="input-icon"><i class="fa-solid fa-envelope"></i></span>
+                <span class="input-icon"><svg class="icon" aria-hidden="true"><use href="#icon-envelope"></use></svg></span>
               </div>
             </div>
 
             <!-- Global error -->
             <div x-show="profileErrors._global" class="alert-error" x-cloak>
-              <i class="fa-solid fa-circle-exclamation"></i>
+              <svg class="icon" aria-hidden="true"><use href="#icon-circle-exclamation"></use></svg>
               <span x-text="profileErrors._global"></span>
             </div>
 
             <!-- Success banner -->
             <div x-show="profileSuccess" class="alert-ok" x-cloak>
-              <i class="fa-solid fa-circle-check"></i>
+              <svg class="icon" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
               <span>Profile saved successfully.</span>
             </div>
 
             <div class="flex justify-end">
               <button @click="saveProfile()" :disabled="profileSaving" class="btn-primary">
-                <i class="fa-solid fa-circle-notch fa-spin" x-show="profileSaving"></i>
-                <i class="fa-solid fa-floppy-disk" x-show="!profileSaving"></i>
+                <svg class="icon icon-spin" x-show="profileSaving" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                <svg class="icon" x-show="!profileSaving" aria-hidden="true"><use href="#icon-floppy-disk"></use></svg>
                 <span x-text="profileSaving ? 'Saving\u2026' : 'Save Changes'"></span>
               </button>
             </div>
@@ -91,14 +91,14 @@
                 <button type="button" class="input-icon input-icon--btn"
                   @click="showCurrentPw = !showCurrentPw"
                   :title="showCurrentPw ? 'Hide' : 'Show'">
-                  <i :class="showCurrentPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                  <svg class="icon" x-show="showCurrentPw" aria-hidden="true"><use href="#icon-eye-slash"></use></svg>
+                  <svg class="icon" x-show="!showCurrentPw" aria-hidden="true"><use href="#icon-eye"></use></svg>
                 </button>
               </div>
               <p class="field-error" x-show="pwErrors.current" x-text="pwErrors.current"></p>
             </div>
 
             <!-- New Password -->
-            <div class="space-y-1.5">
               <label class="label-mono" for="pw-new">New Password</label>
               <div class="input-wrapper" :class="{ 'has-error': pwErrors.new_ }">
                 <input id="pw-new"
@@ -110,7 +110,8 @@
                 <button type="button" class="input-icon input-icon--btn"
                   @click="showNewPw = !showNewPw"
                   :title="showNewPw ? 'Hide' : 'Show'">
-                  <i :class="showNewPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                  <svg class="icon" x-show="showNewPw" aria-hidden="true"><use href="#icon-eye-slash"></use></svg>
+                  <svg class="icon" x-show="!showNewPw" aria-hidden="true"><use href="#icon-eye"></use></svg>
                 </button>
               </div>
               <p class="field-error" x-show="pwErrors.new_" x-text="pwErrors.new_"></p>
@@ -129,7 +130,8 @@
                 <button type="button" class="input-icon input-icon--btn"
                   @click="showConfirmPw = !showConfirmPw"
                   :title="showConfirmPw ? 'Hide' : 'Show'">
-                  <i :class="showConfirmPw ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                  <svg class="icon" x-show="showConfirmPw" aria-hidden="true"><use href="#icon-eye-slash"></use></svg>
+                  <svg class="icon" x-show="!showConfirmPw" aria-hidden="true"><use href="#icon-eye"></use></svg>
                 </button>
               </div>
               <p class="field-error" x-show="pwErrors.confirm" x-text="pwErrors.confirm"></p>
@@ -137,20 +139,20 @@
 
             <!-- Global error -->
             <div x-show="pwErrors._global" class="alert-error" x-cloak>
-              <i class="fa-solid fa-circle-exclamation"></i>
+              <svg class="icon" aria-hidden="true"><use href="#icon-circle-exclamation"></use></svg>
               <span x-text="pwErrors._global"></span>
             </div>
 
             <!-- Success banner -->
             <div x-show="pwSuccess" class="alert-ok" x-cloak>
-              <i class="fa-solid fa-circle-check"></i>
+              <svg class="icon" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
               <span>Password updated successfully.</span>
             </div>
 
             <div class="flex justify-end">
               <button @click="changePassword()" :disabled="pwLoading" class="btn-primary">
-                <i class="fa-solid fa-circle-notch fa-spin" x-show="pwLoading"></i>
-                <i class="fa-solid fa-key" x-show="!pwLoading"></i>
+                <svg class="icon icon-spin" x-show="pwLoading" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                <svg class="icon" x-show="!pwLoading" aria-hidden="true"><use href="#icon-key"></use></svg>
                 <span x-text="pwLoading ? 'Updating\u2026' : 'Update Password'"></span>
               </button>
             </div>

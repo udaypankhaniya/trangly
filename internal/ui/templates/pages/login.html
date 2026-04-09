@@ -7,7 +7,7 @@
       <div class="absolute inset-0 bg-gradient-to-tr from-[var(--bg-base)] via-transparent to-transparent z-10"></div>
       <div class="relative z-20 text-center px-12">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-6">
-          <i class="fa-solid fa-terminal text-black text-2xl"></i>
+          <svg class="icon text-black text-2xl" aria-hidden="true"><use href="#icon-terminal"></use></svg>
         </div>
         <h2 class="page-title mb-3">Push. Deploy. Done.</h2>
         <p class="body-sm font-mono text-xs uppercase tracking-widest max-w-xs mx-auto">
@@ -20,7 +20,7 @@
     <section class="w-full lg:w-7/12 flex flex-col relative bg-[var(--bg-base)]">
       <!-- Theme toggle -->
       <button id="theme-toggle" class="absolute top-4 right-4 lg:top-6 lg:right-6 btn-ghost px-2 z-20" aria-label="Toggle theme">
-        <i class="fa-solid fa-moon" id="theme-icon"></i>
+        <svg class="icon" id="theme-icon" aria-hidden="true"><use href="#icon-moon"></use></svg>
       </button>
 
       <!-- Form area -->
@@ -30,7 +30,7 @@
           <div class="mb-10">
             <div class="flex items-center gap-2 mb-4">
               <div class="w-7 h-7 bg-white flex items-center justify-center rounded-sm">
-                <i class="fa-solid fa-terminal text-black text-xs"></i>
+                <svg class="icon text-black text-xs" aria-hidden="true"><use href="#icon-terminal"></use></svg>
               </div>
               <span class="font-mono font-bold tracking-tight text-lg">Trangly</span>
             </div>
@@ -40,7 +40,7 @@
 
           <!-- Server Error -->
           <div x-show="error" x-cloak class="alert-error mb-6">
-            <i class="fa-solid fa-circle-exclamation"></i>
+            <svg class="icon" aria-hidden="true"><use href="#icon-circle-exclamation"></use></svg>
             <span x-text="error"></span>
           </div>
 
@@ -57,7 +57,7 @@
                        placeholder="Enter username"
                        autocomplete="username"
                        autofocus />
-                <span class="input-icon"><i class="fa-solid fa-user"></i></span>
+                <span class="input-icon"><svg class="icon" aria-hidden="true"><use href="#icon-user"></use></svg></span>
               </div>
               <p class="field-error" x-show="errors.username" x-text="errors.username" x-cloak></p>
             </div>
@@ -82,7 +82,7 @@
                        @blur="validateField('password')"
                        placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                        autocomplete="current-password" />
-                <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+                <span class="input-icon"><svg class="icon" aria-hidden="true"><use href="#icon-lock"></use></svg></span>
               </div>
               <p class="field-error" x-show="errors.password" x-text="errors.password" x-cloak></p>
             </div>
@@ -92,7 +92,7 @@
               <button type="submit"
                       :disabled="loading"
                       class="btn-primary w-full justify-center h-11 text-sm uppercase tracking-widest">
-                <i class="fa-solid fa-circle-notch fa-spin" x-show="loading"></i>
+                <svg class="icon icon-spin" x-show="loading" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
                 <span x-text="loading ? 'Authenticating\u2026' : 'Sign In'"></span>
               </button>
             </div>

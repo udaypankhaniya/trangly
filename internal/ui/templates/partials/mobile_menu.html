@@ -5,26 +5,26 @@
     <div class="mobile-menu-header">
       <a href="/dashboard" class="flex items-center gap-2">
         <div class="w-5 h-5 bg-white flex items-center justify-center rounded-sm">
-          <i class="fa-solid fa-terminal text-black" style="font-size:9px"></i>
+          <svg class="icon text-black" style="font-size:9px" aria-hidden="true"><use href="#icon-terminal"></use></svg>
         </div>
         <span class="font-mono text-xs font-bold">Trangly</span>
       </a>
       <button @click="mobileMenuOpen = false" class="btn-ghost px-2" type="button">
-        <i class="fa-solid fa-xmark"></i>
+        <svg class="icon" aria-hidden="true"><use href="#icon-xmark"></use></svg>
       </button>
     </div>
     <nav class="flex flex-col gap-1 p-3">
       <a href="/dashboard" class="mobile-menu-link{{if eq .ActiveNav "dashboard"}} mobile-menu-link--active{{end}}">
-        <i class="fa-solid fa-gauge mobile-menu-link-icon"></i> Dashboard
+        <svg class="icon mobile-menu-link-icon" aria-hidden="true"><use href="#icon-gauge"></use></svg> Dashboard
       </a>
       <a href="/deployments" class="mobile-menu-link{{if eq .ActiveNav "deployments"}} mobile-menu-link--active{{end}}">
-        <i class="fa-solid fa-rocket mobile-menu-link-icon"></i> Deployments
+        <svg class="icon mobile-menu-link-icon" aria-hidden="true"><use href="#icon-rocket"></use></svg> Deployments
       </a>
       <a href="/settings" class="mobile-menu-link{{if eq .ActiveNav "settings"}} mobile-menu-link--active{{end}}">
-        <i class="fa-solid fa-gear mobile-menu-link-icon"></i> Settings
+        <svg class="icon mobile-menu-link-icon" aria-hidden="true"><use href="#icon-gear"></use></svg> Settings
       </a>
       <a href="/profile" class="mobile-menu-link{{if eq .ActiveNav "profile"}} mobile-menu-link--active{{end}}">
-        <i class="fa-solid fa-circle-user mobile-menu-link-icon"></i> Edit Profile
+        <svg class="icon mobile-menu-link-icon" aria-hidden="true"><use href="#icon-circle-user"></use></svg> Edit Profile
       </a>
     </nav>
     <div class="mt-auto p-4 border-t border-[var(--border-subtle)] flex flex-col gap-1">
@@ -34,11 +34,11 @@
         document.documentElement.classList.toggle('dark', t === 'dark');
         localStorage.setItem('sy_theme', t);
       })()">
-        <i class="fa-solid fa-circle-half-stroke"></i>
+        <svg class="icon" aria-hidden="true"><use href="#icon-circle-half-stroke"></use></svg>
         <span class="sidebar-footer-label">Toggle theme</span>
       </button>
       <button @click="api.logout()" class="sidebar-footer-btn sidebar-footer-btn--danger" type="button">
-        <i class="fa-solid fa-right-from-bracket"></i>
+        <svg class="icon" aria-hidden="true"><use href="#icon-right-from-bracket"></use></svg>
         <span class="sidebar-footer-label">Sign out</span>
       </button>
     </div>

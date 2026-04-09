@@ -6,6 +6,7 @@
   {{block "head_extra" .}}{{end}}
 </head>
 <body class="font-sans antialiased" x-data="{{.AlpineData}}" x-cloak>
+  {{template "icons" .}}
   {{template "sidebar" .}}
   {{template "mobile_menu" .}}
 
@@ -13,12 +14,12 @@
   <div class="mobile-topbar">
     <a href="/dashboard" class="flex items-center gap-2">
       <div class="w-6 h-6 bg-white flex items-center justify-content-center rounded-sm flex items-center justify-center">
-        <i class="fa-solid fa-terminal text-black text-xs"></i>
+        <svg class="icon text-black text-xs" aria-hidden="true"><use href="#icon-terminal"></use></svg>
       </div>
       <span class="font-mono text-xs font-bold tracking-tight">Trangly</span>
     </a>
     <button @click="mobileMenuOpen = true" class="btn-ghost px-2" aria-label="Open menu">
-      <i class="fa-solid fa-bars"></i>
+      <svg class="icon" aria-hidden="true"><use href="#icon-bars"></use></svg>
     </button>
   </div>
 

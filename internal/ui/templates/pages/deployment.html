@@ -1,13 +1,13 @@
 {{define "content"}}
     <!-- Loading State -->
     <div x-show="!deployment && !loadError" class="flex-1 flex items-center justify-center">
-      <i class="fa-solid fa-circle-notch fa-spin text-xl text-[var(--text-muted)]"></i>
+      <svg class="icon icon-spin text-xl text-[var(--text-muted)]" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
     </div>
 
     <!-- Error State -->
     <div x-show="loadError" class="flex-1 flex items-center justify-center">
       <div class="text-center">
-        <i class="fa-solid fa-circle-exclamation text-4xl text-[var(--color-fail)] mb-4 block"></i>
+        <svg class="icon text-4xl text-[var(--color-fail)] mb-4 block" aria-hidden="true"><use href="#icon-circle-exclamation"></use></svg>
         <h3 class="text-sm font-bold mb-2" x-text="loadError"></h3>
         <a href="/deployments" class="text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-primary)] underline">Back to Deployments</a>
       </div>
@@ -20,7 +20,7 @@
         <!-- Back Link -->
         <div class="mb-3">
           <a href="/deployments" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors inline-flex items-center gap-1 font-mono text-xs uppercase tracking-widest">
-            <i class="fa-solid fa-arrow-left text-xs"></i> Deployments
+            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-arrow-left"></use></svg> Deployments
           </a>
         </div>
 
@@ -46,26 +46,26 @@
               </div>
               <div class="flex flex-wrap items-center gap-4 text-[var(--text-muted)]">
                 <div class="flex items-center gap-1.5">
-                  <i class="fa-solid fa-code-commit text-xs"></i>
+                  <svg class="icon text-xs" aria-hidden="true"><use href="#icon-code-commit"></use></svg>
                   <span class="font-mono text-xs" x-text="deployment.commit_sha?.substring(0, 7)"></span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <i class="fa-solid fa-code-branch text-xs"></i>
+                  <svg class="icon text-xs" aria-hidden="true"><use href="#icon-code-branch"></use></svg>
                   <span class="font-mono text-xs" x-text="deployment.branch"></span>
                 </div>
                 <template x-if="deployment.repo_full_name">
                   <div class="flex items-center gap-1.5">
-                    <i class="fa-brands fa-github text-xs"></i>
+                    <svg class="icon text-xs" aria-hidden="true"><use href="#icon-github"></use></svg>
                     <span class="font-mono text-xs truncate max-w-[200px]" x-text="deployment.repo_full_name"></span>
                   </div>
                 </template>
                 <div class="flex items-center gap-1.5">
-                  <i class="fa-regular fa-clock text-xs"></i>
+                  <svg class="icon text-xs" aria-hidden="true"><use href="#icon-clock"></use></svg>
                   <span class="font-mono text-xs" x-text="timeAgo(deployment.finished_at || deployment.queued_at)"></span>
                 </div>
                 <template x-if="deployment.started_at && deployment.finished_at">
                   <div class="flex items-center gap-1.5">
-                    <i class="fa-solid fa-stopwatch text-xs"></i>
+                    <svg class="icon text-xs" aria-hidden="true"><use href="#icon-stopwatch"></use></svg>
                     <span class="font-mono text-xs" x-text="duration(deployment.started_at, deployment.finished_at)"></span>
                   </div>
                 </template>
@@ -75,7 +75,7 @@
               </template>
             </div>
             <a :href="'/project?id=' + deployment.project_id" class="btn-secondary self-start sm:self-auto shrink-0 text-xs">
-              <i class="fa-solid fa-folder text-xs"></i> View Project
+              <svg class="icon text-xs" aria-hidden="true"><use href="#icon-folder"></use></svg> View Project
             </a>
           </div>
         </section>
@@ -91,12 +91,10 @@
                 <template x-for="phase in pipelinePhases" :key="phase">
                   <button class="ps-step" :class="pipelineStepClass(phase)" @click="selectPhase(phase)">
                     <span class="ps-step-icon">
-                      <i :class="{
-                        'fa-solid fa-circle-check':               phaseState(phase) === 'done',
-                        'fa-solid fa-circle-xmark':               phaseState(phase) === 'active' && deployment?.status === 'failed',
-                        'fa-solid fa-circle-notch fa-spin':       phaseState(phase) === 'active' && deployment?.status !== 'failed',
-                        'fa-regular fa-circle opacity-40':        phaseState(phase) !== 'done' && phaseState(phase) !== 'active'
-                      }"></i>
+                      <svg class="icon" x-show="phaseState(phase) === 'done'" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
+                      <svg class="icon" x-show="phaseState(phase) === 'active' && deployment?.status === 'failed'" aria-hidden="true"><use href="#icon-circle-xmark"></use></svg>
+                      <svg class="icon icon-spin" x-show="phaseState(phase) === 'active' && deployment?.status !== 'failed'" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                      <svg class="icon" style="opacity:0.4" x-show="phaseState(phase) !== 'done' && phaseState(phase) !== 'active'" aria-hidden="true"><use href="#icon-circle"></use></svg>
                     </span>
                     <span class="ps-step-body">
                       <span class="ps-step-label" x-text="phase.replace(/_/g,' ')"></span>
@@ -136,7 +134,7 @@
                   </div>
                 </template>
                 <div x-show="logLines.length === 0" class="text-[var(--text-muted)] text-center py-12 lg:py-16">
-                  <i class="fa-solid fa-terminal text-3xl mb-2 block"></i>
+                  <svg class="icon text-3xl mb-2 block" aria-hidden="true"><use href="#icon-terminal"></use></svg>
                   <p class="font-mono text-xs">No logs available for this deployment.</p>
                 </div>
               </div>
