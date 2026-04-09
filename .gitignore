@@ -3,6 +3,9 @@ dev-data/
 
 # Build output
 dist/
+# Exception: compiled CSS is a committed artifact (go:embed needs it at build time)
+!internal/ui/static/dist/
+!internal/ui/static/dist/style.min.css
 
 # Coverage
 coverage.out
