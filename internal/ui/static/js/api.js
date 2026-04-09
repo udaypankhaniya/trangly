@@ -64,17 +64,17 @@ class ApiClient {
     this._ensureToastContainer();
 
     const cfg = {
-      success: { cls: 'toast-success', icon: 'fa-circle-check' },
-      error:   { cls: 'toast-error',   icon: 'fa-circle-xmark' },
-      warning: { cls: 'toast-warn',    icon: 'fa-triangle-exclamation' },
-      info:    { cls: 'toast-info',    icon: 'fa-circle-info' },
+      success: { cls: 'toast-success', icon: 'circle-check' },
+      error:   { cls: 'toast-error',   icon: 'circle-xmark' },
+      warning: { cls: 'toast-warn',    icon: 'triangle-exclamation' },
+      info:    { cls: 'toast-info',    icon: 'circle-info' },
     };
     const c = cfg[type] || cfg.info;
 
     const el = document.createElement('div');
     el.className = 'toast animate-toast ' + c.cls;
     el.innerHTML =
-      '<i class="fa-solid ' + c.icon + '"></i>' +
+      '<svg class="icon" aria-hidden="true"><use href="#icon-' + c.icon + '"></use></svg>' +
       '<span>' + this._escapeHtml(message) + '</span>';
     this._toastContainer.appendChild(el);
 
@@ -167,8 +167,12 @@ function applyTheme(theme) {
   html.classList.toggle('dark', theme === 'dark');
   localStorage.setItem('sy_theme', theme);
   if (icon) {
-    // Font Awesome: show sun in dark (→ switch to light), moon in light (→ switch to dark)
-    icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    // Lucide SVG sprite: swap the <use href> between sun (dark mode → switch to light)
+    // and moon (light mode → switch to dark).
+    const useEl = icon.querySelector('use');
+    if (useEl) {
+      useEl.setAttribute('href', theme === 'dark' ? '#icon-sun' : '#icon-moon');
+    }
   }
   if (label) {
     label.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';

@@ -13,7 +13,7 @@
         <!-- GitHub Integration Card (spans 2 cols) -->
         <div class="bento-card bento-card--github">
           <div class="bento-card-header">
-            <i class="fa-brands fa-github text-[var(--text-secondary)]"></i>
+            <svg class="icon text-[var(--text-secondary)]" aria-hidden="true"><use href="#icon-github"></use></svg>
             <span class="section-title">GitHub</span>
             <span class="ml-auto">
               <template x-if="githubState === 'fully_connected'">
@@ -33,13 +33,13 @@
             <template x-if="githubState === 'not_connected'">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 bg-[var(--bg-elevated)] rounded-lg flex items-center justify-center border border-[var(--border-default)] shrink-0">
-                  <i class="fa-brands fa-github text-xl text-[var(--text-secondary)]"></i>
+                  <svg class="icon text-xl text-[var(--text-secondary)]" aria-hidden="true"><use href="#icon-github"></use></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="body-sm mb-4 leading-relaxed">Connect a GitHub App so Trangly can receive push webhooks and clone your repositories. One click &mdash; no copy-pasting.</p>
                   <button @click="connectGitHub()" :disabled="githubLoading" class="btn-primary">
-                    <i class="fa-solid fa-circle-notch fa-spin" x-show="githubLoading"></i>
-                    <i class="fa-brands fa-github" x-show="!githubLoading"></i>
+                    <svg class="icon icon-spin" x-show="githubLoading" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                    <svg class="icon" x-show="!githubLoading" aria-hidden="true"><use href="#icon-github"></use></svg>
                     <span x-text="githubLoading ? 'Redirecting\u2026' : 'Connect GitHub'"></span>
                   </button>
                 </div>
@@ -50,7 +50,7 @@
             <template x-if="githubState === 'app_created'">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 bg-[var(--bg-elevated)] rounded-lg flex items-center justify-center border border-[var(--border-default)] shrink-0">
-                  <i class="fa-brands fa-github text-xl text-[var(--text-secondary)]"></i>
+                  <svg class="icon text-xl text-[var(--text-secondary)]" aria-hidden="true"><use href="#icon-github"></use></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="grid grid-cols-2 gap-x-6 gap-y-0.5 mb-4 font-mono text-xs max-w-xs">
@@ -60,12 +60,12 @@
                   <p class="body-sm mb-4">Install the app on your repositories to complete setup.</p>
                   <div class="flex flex-wrap gap-3">
                     <button @click="installOnRepos()" :disabled="githubLoading" class="btn-primary">
-                      <i class="fa-solid fa-circle-notch fa-spin" x-show="githubLoading"></i>
-                      <i class="fa-brands fa-github" x-show="!githubLoading"></i>
+                      <svg class="icon icon-spin" x-show="githubLoading" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                      <svg class="icon" x-show="!githubLoading" aria-hidden="true"><use href="#icon-github"></use></svg>
                       <span x-text="githubLoading ? 'Redirecting\u2026' : 'Select Repositories'"></span>
                     </button>
                     <button @click="showDisconnectConfirm = true" :disabled="githubLoading" class="btn-secondary">
-                      <i class="fa-solid fa-link-slash"></i> Disconnect
+                      <svg class="icon" aria-hidden="true"><use href="#icon-link-slash"></use></svg> Disconnect
                     </button>
                   </div>
                 </div>
@@ -76,7 +76,7 @@
             <template x-if="githubState === 'fully_connected'">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 bg-[var(--bg-elevated)] rounded-lg flex items-center justify-center border border-[var(--border-default)] shrink-0">
-                  <i class="fa-brands fa-github text-xl text-[var(--text-secondary)]"></i>
+                  <svg class="icon text-xl text-[var(--text-secondary)]" aria-hidden="true"><use href="#icon-github"></use></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="grid grid-cols-2 gap-x-6 gap-y-0.5 mb-4 font-mono text-xs max-w-xs">
@@ -88,11 +88,11 @@
                   <div class="flex flex-wrap gap-3">
                     <a :href="'https://github.com/settings/installations/' + github.installation_id"
                        target="_blank" rel="noopener noreferrer" class="btn-secondary">
-                      <i class="fa-brands fa-github"></i>
+                      <svg class="icon" aria-hidden="true"><use href="#icon-github"></use></svg>
                       Manage on GitHub
                     </a>
                     <button @click="showDisconnectConfirm = true" :disabled="githubLoading" class="btn-secondary">
-                      <i class="fa-solid fa-link-slash"></i> Disconnect
+                      <svg class="icon" aria-hidden="true"><use href="#icon-link-slash"></use></svg> Disconnect
                     </button>
                   </div>
                 </div>
@@ -105,7 +105,7 @@
         <!-- Memory Card -->
         <div class="bento-card bento-card--memory">
           <div class="bento-card-header">
-            <i class="fa-solid fa-microchip text-[var(--text-secondary)]"></i>
+            <svg class="icon text-[var(--text-secondary)]" aria-hidden="true"><use href="#icon-microchip"></use></svg>
             <span class="section-title">Memory</span>
             <template x-if="ram">
               <span class="ml-auto font-mono text-lg font-bold text-[var(--text-primary)]">
@@ -137,7 +137,7 @@
               </div>
             </template>
             <p x-show="!ram" class="body-sm flex items-center gap-2">
-              <i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;
+              <svg class="icon icon-spin" aria-hidden="true"><use href="#icon-circle-notch"></use></svg> Loading&hellip;
             </p>
           </div>
         </div><!-- /memory -->
@@ -145,7 +145,7 @@
         <!-- Preflight Checks (full width) -->
         <div class="bento-card bento-card--preflight">
           <div class="bento-card-header">
-            <i class="fa-solid fa-list-check text-[var(--text-secondary)]"></i>
+            <svg class="icon text-[var(--text-secondary)]" aria-hidden="true"><use href="#icon-list-check"></use></svg>
             <span class="section-title">Preflight Checks</span>
             <template x-if="preflight.length > 0">
               <span class="ml-auto label-mono"
@@ -154,21 +154,14 @@
           </div>
           <div class="bento-preflight-grid">
             <div x-show="preflight.length === 0" class="bento-check-empty">
-              <i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;
+              <svg class="icon icon-spin" aria-hidden="true"><use href="#icon-circle-notch"></use></svg> Loading&hellip;
             </div>
             <template x-for="(c, i) in preflight" :key="c.name">
               <div class="bento-check-item" :class="{ 'bento-check-item--last-row': i >= preflight.length - (preflight.length % 2 === 0 ? 2 : 1) }">
-                <i class="bento-check-icon fa-solid"
-                   :class="{
-                     'fa-circle-check':         c.status === 'ok' || c.status === 'pass',
-                     'fa-triangle-exclamation': c.status === 'warn' || c.status === 'warning',
-                     'fa-circle-xmark':         c.status === 'fail' || c.status === 'error',
-                     'fa-circle-minus':         c.status !== 'ok' && c.status !== 'pass' && c.status !== 'warn' && c.status !== 'warning' && c.status !== 'fail' && c.status !== 'error',
-                     'text-[var(--color-ok)]':   c.status === 'ok' || c.status === 'pass',
-                     'text-[var(--color-warn)]': c.status === 'warn' || c.status === 'warning',
-                     'text-[var(--color-fail)]': c.status === 'fail' || c.status === 'error',
-                     'text-[var(--text-muted)]': c.status !== 'ok' && c.status !== 'pass' && c.status !== 'warn' && c.status !== 'warning' && c.status !== 'fail' && c.status !== 'error'
-                   }"></i>
+                  <svg class="icon bento-check-icon text-[var(--color-ok)]" x-show="c.status === 'ok' || c.status === 'pass'" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
+                  <svg class="icon bento-check-icon text-[var(--color-warn)]" x-show="c.status === 'warn' || c.status === 'warning'" aria-hidden="true"><use href="#icon-triangle-exclamation"></use></svg>
+                  <svg class="icon bento-check-icon text-[var(--color-fail)]" x-show="c.status === 'fail' || c.status === 'error'" aria-hidden="true"><use href="#icon-circle-xmark"></use></svg>
+                  <svg class="icon bento-check-icon text-[var(--text-muted)]" x-show="c.status !== 'ok' && c.status !== 'pass' && c.status !== 'warn' && c.status !== 'warning' && c.status !== 'fail' && c.status !== 'error'" aria-hidden="true"><use href="#icon-circle-minus"></use></svg>
                 <div class="min-w-0 flex-1">
                   <p class="font-mono text-xs font-bold truncate" x-text="c.name"></p>
                   <p class="font-mono text-[10px] text-[var(--text-muted)] mt-0.5" x-text="c.detail"></p>
@@ -192,7 +185,7 @@
             <div class="flex items-start gap-4">
               <div class="w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center"
                    style="background:rgba(251,191,36,0.10)">
-                <i class="fa-solid fa-triangle-exclamation text-[var(--color-warn)] text-sm"></i>
+              <svg class="icon text-[var(--color-warn)] text-sm" aria-hidden="true"><use href="#icon-triangle-exclamation"></use></svg>
               </div>
               <div>
                 <h4 class="section-title mb-1">Disconnect GitHub</h4>
@@ -218,7 +211,7 @@
           <div class="flex items-center gap-3 justify-end px-6 py-4 border-t border-[var(--border-subtle)]">
             <button @click="showDisconnectConfirm = false" class="btn-secondary">Cancel</button>
             <button @click="disconnectGitHub()" :disabled="githubLoading" class="btn-danger">
-              <i class="fa-solid fa-circle-notch fa-spin" x-show="githubLoading"></i>
+              <svg class="icon icon-spin" x-show="githubLoading" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
               <span x-text="githubLoading ? 'Disconnecting\u2026' : 'Disconnect'"></span>
             </button>
           </div>

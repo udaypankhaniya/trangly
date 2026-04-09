@@ -4,7 +4,7 @@
   <div class="sidebar-logo">
     <a href="/dashboard" class="flex items-center gap-2.5">
       <div class="w-6 h-6 bg-white flex items-center justify-center rounded-sm shrink-0">
-        <i class="fa-solid fa-terminal text-black" style="font-size:10px"></i>
+        <svg class="icon text-black" style="font-size:10px" aria-hidden="true"><use href="#icon-terminal"></use></svg>
       </div>
       <span class="font-mono text-sm font-bold tracking-tight">Trangly</span>
     </a>
@@ -18,7 +18,7 @@
 
   <!-- Global search trigger -->
   <button class="sidebar-search-trigger" id="global-search-trigger" type="button">
-    <i class="fa-solid fa-magnifying-glass"></i>
+    <svg class="icon" aria-hidden="true"><use href="#icon-magnifying-glass"></use></svg>
     <span>Search&hellip;</span>
     <kbd>&#8984;K</kbd>
   </button>
@@ -26,15 +26,15 @@
   <!-- Nav links -->
   <nav class="sidebar-nav">
     <a href="/dashboard" class="sidebar-link{{if eq .ActiveNav "dashboard"}} sidebar-link--active{{end}}">
-      <i class="fa-solid fa-gauge sidebar-link-icon"></i>
+      <svg class="icon sidebar-link-icon" aria-hidden="true"><use href="#icon-gauge"></use></svg>
       <span>Dashboard</span>
     </a>
     <a href="/deployments" class="sidebar-link{{if eq .ActiveNav "deployments"}} sidebar-link--active{{end}}">
-      <i class="fa-solid fa-rocket sidebar-link-icon"></i>
+      <svg class="icon sidebar-link-icon" aria-hidden="true"><use href="#icon-rocket"></use></svg>
       <span>Deployments</span>
     </a>
     <a href="/settings" class="sidebar-link{{if eq .ActiveNav "settings"}} sidebar-link--active{{end}}">
-      <i class="fa-solid fa-gear sidebar-link-icon"></i>
+      <svg class="icon sidebar-link-icon" aria-hidden="true"><use href="#icon-gear"></use></svg>
       <span>Settings</span>
     </a>
   </nav>
@@ -42,15 +42,15 @@
   <!-- Footer: theme toggle + profile + logout -->
   <div class="sidebar-footer">
     <button id="theme-toggle" class="sidebar-footer-btn" type="button" aria-label="Toggle theme">
-      <i class="fa-solid fa-moon" id="theme-icon"></i>
+      <svg class="icon" id="theme-icon" aria-hidden="true"><use href="#icon-moon"></use></svg>
       <span class="sidebar-footer-label" id="theme-label">Dark mode</span>
     </button>
     <a href="/profile" class="sidebar-footer-btn{{if eq .ActiveNav "profile"}} sidebar-footer-btn--active{{end}}">
-      <i class="fa-solid fa-circle-user"></i>
+      <svg class="icon" aria-hidden="true"><use href="#icon-circle-user"></use></svg>
       <span class="sidebar-footer-label">Edit Profile</span>
     </a>
     <button @click="api.logout()" class="sidebar-footer-btn sidebar-footer-btn--danger" type="button">
-      <i class="fa-solid fa-right-from-bracket"></i>
+      <svg class="icon" aria-hidden="true"><use href="#icon-right-from-bracket"></use></svg>
       <span class="sidebar-footer-label">Sign out</span>
     </button>
   </div>

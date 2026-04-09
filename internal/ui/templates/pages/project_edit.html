@@ -1,6 +1,6 @@
 {{define "head_extra"}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<link rel="stylesheet" href="/static/vendor/tom-select.min.css" />
+<script src="/static/vendor/tom-select.complete.min.js"></script>
 {{end}}
 
 {{define "content"}}
@@ -16,11 +16,11 @@
     <!-- Error state -->
     <div x-show="!projectLoading && pageError" class="max-w-2xl">
         <div class="alert-error mb-4">
-            <i class="fa-solid fa-circle-exclamation"></i>
+            <svg class="icon" aria-hidden="true"><use href="#icon-circle-exclamation"></use></svg>
             <span x-text="pageError"></span>
         </div>
         <a href="/dashboard" class="btn-secondary text-sm">
-            <i class="fa-solid fa-arrow-left text-xs"></i>
+            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
             Back to Dashboard
         </a>
     </div>
@@ -32,7 +32,7 @@
         <div class="flex items-center gap-3 mb-6">
             <a :href="projectId ? '/project?id=' + projectId : '/dashboard'"
                 class="btn-ghost px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]" title="Back">
-                <i class="fa-solid fa-arrow-left"></i>
+                <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
             </a>
             <div>
                 <h1 class="page-title mb-0.5" x-text="projectId ? 'Edit Project' : 'New Project'"></h1>
@@ -47,14 +47,14 @@
                 class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 transition-colors" :class="activeTab === 'general'
                     ? 'border-[var(--accent)] text-[var(--accent)]'
                     : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'">
-                <i class="fa-solid fa-sliders mr-1.5 text-xs"></i>
+                <svg class="icon mr-1.5 text-xs" aria-hidden="true"><use href="#icon-sliders"></use></svg>
                 General
             </button>
             <button @click="activeTab = 'env'"
                 class="tab-btn px-4 py-2.5 text-sm font-medium border-b-2 transition-colors" :class="activeTab === 'env'
                     ? 'border-[var(--accent)] text-[var(--accent)]'
                     : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'">
-                <i class="fa-solid fa-lock mr-1.5 text-xs"></i>
+                <svg class="icon mr-1.5 text-xs" aria-hidden="true"><use href="#icon-lock"></use></svg>
                 Environment
                 <span x-show="envVarCount() > 0"
                     class="ml-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]/30"
@@ -82,7 +82,7 @@
                     <template x-if="projectId">
                         <div
                             class="flex items-center gap-2 px-3 py-2 rounded bg-[var(--bg-raised)] border border-[var(--border-subtle)]">
-                            <i class="fa-brands fa-github text-[var(--text-muted)] text-sm"></i>
+                            <svg class="icon text-[var(--text-muted)] text-sm" aria-hidden="true"><use href="#icon-github"></use></svg>
                             <span class="font-mono text-sm text-[var(--text-primary)]"
                                 x-text="form.repo_full_name"></span>
                             <span class="ml-auto text-[10px] text-[var(--text-muted)] font-mono">read-only</span>
@@ -94,7 +94,7 @@
                             <input type="text" x-model="form.repo_full_name" placeholder="owner/repo" />
                             <p x-show="!githubConnected"
                                 class="text-[var(--color-warn)] font-mono text-[10px] mt-1 flex items-center gap-1">
-                                <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                                <svg class="icon text-xs" aria-hidden="true"><use href="#icon-triangle-exclamation"></use></svg>
                                 Connect GitHub in <a href="/settings" class="underline ml-1">Settings</a> for repo
                                 picker
                             </p>
@@ -122,13 +122,7 @@
                             <input x-show="branches.length === 0" type="text" x-model="form.default_branch"
                                 placeholder="main" />
                             <span x-show="branchesLoading" class="absolute right-2 top-1/2 -translate-y-1/2">
-                                <i class="fa-solid fa-circle-notch fa-spin text-[var(--text-muted)] text-sm"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label>Compose File</label>
-                        <div class="relative">
+                                <svg class="icon icon-spin text-[var(--text-muted)] text-sm" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
                             <select x-show="composeFiles.length > 0" x-model="form.compose_path" class="w-full">
                                 <template x-for="f in composeFiles" :key="f">
                                     <option :value="f" x-text="f"></option>
@@ -137,7 +131,7 @@
                             <input x-show="composeFiles.length === 0" type="text" x-model="form.compose_path"
                                 placeholder="docker-compose.yml" />
                             <span x-show="composeLoading" class="absolute right-2 top-1/2 -translate-y-1/2">
-                                <i class="fa-solid fa-circle-notch fa-spin text-[var(--text-muted)] text-sm"></i>
+                                <svg class="icon icon-spin text-[var(--text-muted)] text-sm" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
                             </span>
                         </div>
                     </div>
@@ -185,7 +179,7 @@
 
                 <!-- Loading -->
                 <div x-show="envLoading" class="flex items-center gap-2 text-sm text-[var(--text-muted)] py-6">
-                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    <svg class="icon icon-spin" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
                     Loading environment variables&hellip;
                 </div>
 
@@ -198,7 +192,7 @@
                             </p>
                         </div>
                         <label class="btn-ghost text-xs cursor-pointer px-2 py-1.5 flex items-center gap-1.5 shrink-0">
-                            <i class="fa-solid fa-upload text-[10px]"></i>
+                            <svg class="icon text-[10px]" aria-hidden="true"><use href="#icon-upload"></use></svg>
                             Upload .env
                             <input type="file" accept=".env,text/plain" class="hidden"
                                 @change="$event.target.files[0] && parseEnvFile($event.target.files[0]); $event.target.value = ''" />
@@ -227,14 +221,15 @@
                                     <button type="button" @click="toggleVisible(i)"
                                         class="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                                         :title="v.visible ? 'Hide value' : 'Show value'">
-                                        <i class="fa-solid text-xs" :class="v.visible ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                        <svg class="icon" x-show="v.visible" aria-hidden="true"><use href="#icon-eye-slash"></use></svg>
+                                        <svg class="icon" x-show="!v.visible" aria-hidden="true"><use href="#icon-eye"></use></svg>
                                     </button>
                                 </div>
                                 <!-- Remove -->
                                 <button type="button" @click="removeVar(i)"
                                     class="btn-ghost px-2 py-1.5 text-[var(--text-muted)] hover:text-[var(--color-fail)] transition-colors"
                                     title="Remove">
-                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                    <svg class="icon text-xs" aria-hidden="true"><use href="#icon-xmark"></use></svg>
                                 </button>
                             </div>
                         </template>
@@ -243,7 +238,7 @@
                     <!-- Add variable button -->
                     <button type="button" @click="addVar()"
                         class="mt-3 btn-ghost text-xs px-3 py-2 w-full border border-dashed border-[var(--border-default)] hover:border-[var(--border-strong)] flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-plus text-[10px]"></i>
+                        <svg class="icon text-[10px]" aria-hidden="true"><use href="#icon-plus"></use></svg>
                         Add variable
                     </button>
 
@@ -258,13 +253,13 @@
             <!-- ── Error + Actions ─────────────────────────────────── -->
             <div class="mt-8 pt-6 border-t border-[var(--border-subtle)] space-y-4">
                 <div x-show="formError" class="alert-error">
-                    <i class="fa-solid fa-circle-exclamation"></i>
+                <svg class="icon" aria-hidden="true"><use href="#icon-circle-exclamation"></use></svg>
                     <span x-text="formError"></span>
                 </div>
                 <div class="flex items-center gap-3">
                     <button type="button" @click="save()" :disabled="formLoading" class="btn-primary">
-                        <i class="fa-solid fa-circle-notch fa-spin" x-show="formLoading"></i>
-                        <i class="fa-solid fa-floppy-disk" x-show="!formLoading"></i>
+                        <svg class="icon icon-spin" x-show="formLoading" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                        <svg class="icon" x-show="!formLoading" aria-hidden="true"><use href="#icon-floppy-disk"></use></svg>
                         <span x-text="formLoading ? 'Saving\u2026' : 'Save Project'"></span>
                     </button>
                     <button type="button" @click="cancel()" class="btn-secondary">Cancel</button>

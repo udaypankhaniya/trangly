@@ -10,7 +10,7 @@
       <!-- DataTable Toolbar -->
       <div class="dt-toolbar">
         <div class="dt-search">
-          <i class="fa-solid fa-magnifying-glass dt-search-icon"></i>
+          <svg class="icon dt-search-icon" aria-hidden="true"><use href="#icon-magnifying-glass"></use></svg>
           <input type="text"
                  placeholder="Search commits, branches, projects&hellip;"
                  :value="_searchInput"
@@ -55,27 +55,27 @@
                   :class="{ 'dt-header--active': table.isSorted('status') }"
                   @click="table.setSort('status')">
                 Status
-                <i class="dt-sort-icon" :class="table.isSorted('status') ? (table.sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') : 'fa-solid fa-sort'"></i>
+                <svg class="icon dt-sort-icon" aria-hidden="true"><use :href="table.isSorted('status') ? (table.sortDir === 'asc' ? '#icon-sort-up' : '#icon-sort-down') : '#icon-sort'"></use></svg>
               </th>
               <th class="px-5 py-3 border-b border-[var(--border-default)]">Project</th>
               <th class="px-5 py-3 border-b border-[var(--border-default)] dt-header hidden md:table-cell"
                   :class="{ 'dt-header--active': table.isSorted('commit_sha') }"
                   @click="table.setSort('commit_sha')">
                 Commit
-                <i class="dt-sort-icon" :class="table.isSorted('commit_sha') ? (table.sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') : 'fa-solid fa-sort'"></i>
+                <svg class="icon dt-sort-icon" aria-hidden="true"><use :href="table.isSorted('commit_sha') ? (table.sortDir === 'asc' ? '#icon-sort-up' : '#icon-sort-down') : '#icon-sort'"></use></svg>
               </th>
               <th class="px-5 py-3 border-b border-[var(--border-default)] dt-header hidden lg:table-cell"
                   :class="{ 'dt-header--active': table.isSorted('branch') }"
                   @click="table.setSort('branch')">
                 Branch
-                <i class="dt-sort-icon" :class="table.isSorted('branch') ? (table.sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') : 'fa-solid fa-sort'"></i>
+                <svg class="icon dt-sort-icon" aria-hidden="true"><use :href="table.isSorted('branch') ? (table.sortDir === 'asc' ? '#icon-sort-up' : '#icon-sort-down') : '#icon-sort'"></use></svg>
               </th>
               <th class="px-5 py-3 border-b border-[var(--border-default)] hidden lg:table-cell">Duration</th>
               <th class="px-5 py-3 border-b border-[var(--border-default)] dt-header"
                   :class="{ 'dt-header--active': table.isSorted('queued_at') }"
                   @click="table.setSort('queued_at')">
                 Time
-                <i class="dt-sort-icon" :class="table.isSorted('queued_at') ? (table.sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') : 'fa-solid fa-sort'"></i>
+                <svg class="icon dt-sort-icon" aria-hidden="true"><use :href="table.isSorted('queued_at') ? (table.sortDir === 'asc' ? '#icon-sort-up' : '#icon-sort-down') : '#icon-sort'"></use></svg>
               </th>
               <th class="px-5 py-3 border-b border-[var(--border-default)] text-right">Actions</th>
             </tr>
@@ -123,13 +123,13 @@
 
       <!-- Loading -->
       <div x-show="table.loading && table.rows.length === 0" class="text-center py-16">
-        <i class="fa-solid fa-circle-notch fa-spin text-xl text-[var(--text-muted)]"></i>
+        <svg class="icon icon-spin text-xl text-[var(--text-muted)]" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
       </div>
 
       <!-- Empty State -->
       <div x-show="!table.loading && table.rows.length === 0" class="empty-state">
         <div class="empty-state-icon">
-          <i class="fa-solid fa-clock-rotate-left"></i>
+          <svg class="icon" aria-hidden="true"><use href="#icon-clock-rotate-left"></use></svg>
         </div>
         <h3 class="empty-state-title">No deployments found</h3>
         <p class="empty-state-body">Deploy a project to see deployment history here.</p>
@@ -143,10 +143,10 @@
         </div>
         <div class="dt-pagination-controls">
           <button class="dt-page-btn" :disabled="!table.hasPrev" @click="table.setPage(1)" title="First page">
-            <i class="fa-solid fa-angles-left text-xs"></i>
+            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-angles-left"></use></svg>
           </button>
           <button class="dt-page-btn" :disabled="!table.hasPrev" @click="table.prevPage()" title="Previous page">
-            <i class="fa-solid fa-chevron-left text-xs"></i>
+            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
           </button>
           <template x-for="pg in table.pageRange" :key="'pg-'+pg+'-'+Math.random()">
             <span>
@@ -159,10 +159,10 @@
             </span>
           </template>
           <button class="dt-page-btn" :disabled="!table.hasNext" @click="table.nextPage()" title="Next page">
-            <i class="fa-solid fa-chevron-right text-xs"></i>
+            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
           </button>
           <button class="dt-page-btn" :disabled="!table.hasNext" @click="table.setPage(table.totalPages)" title="Last page">
-            <i class="fa-solid fa-angles-right text-xs"></i>
+            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-angles-right"></use></svg>
           </button>
         </div>
       </div>

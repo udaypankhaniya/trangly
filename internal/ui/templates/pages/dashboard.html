@@ -12,7 +12,7 @@
             </div>
             <button @click="goToEdit(null)"
                 class="btn-primary self-start sm:self-auto">
-                <i class="fa-solid fa-plus"></i>
+                <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
                 New Project
             </button>
         </div>
@@ -40,11 +40,9 @@
                                'bg-blue-500/15': j.status === 'pending',
                                'bg-orange-500/15': j.status === 'held'
                              }">
-                                <i class="text-sm" :class="{
-                                  'fa-solid fa-circle-notch fa-spin text-yellow-500': ['running','building','health_check','swapping','hot_swapping'].includes(j.status),
-                                  'fa-solid fa-clock text-blue-400': j.status === 'pending',
-                                  'fa-solid fa-pause text-orange-400': j.status === 'held'
-                                }"></i>
+                                <svg class="icon icon-spin text-sm text-yellow-500" x-show="['running','building','health_check','swapping','hot_swapping'].includes(j.status)" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                                <svg class="icon text-sm text-blue-400" x-show="j.status === 'pending'" aria-hidden="true"><use href="#icon-clock"></use></svg>
+                                <svg class="icon text-sm text-orange-400" x-show="j.status === 'held'" aria-hidden="true"><use href="#icon-pause"></use></svg>
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2 mb-0.5">
@@ -65,7 +63,7 @@
                                 </div>
                             </div>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors hidden sm:block shrink-0"></i>
+                        <svg class="icon text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors hidden sm:block shrink-0" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
                     </div>
                 </template>
             </div>
@@ -102,17 +100,17 @@
                     <button @click.stop="triggerDeploy(p)"
                         class="btn-secondary ml-3 shrink-0 text-xs px-3 h-8 hidden sm:flex"
                         x-show="!['building','running','health_check','swapping','pending'].includes(statusForProject(p))">
-                        <i class="fa-solid fa-play text-[10px]"></i>
+                        <svg class="icon text-[10px]" aria-hidden="true"><use href="#icon-play"></use></svg>
                         Deploy
                     </button>
                 </div>
 
                 <!-- Last deploy info -->
                 <div class="flex items-center gap-2 text-[11px] font-mono text-[var(--text-muted)] mb-4">
-                    <i class="fa-solid fa-code-commit text-[10px]" :class="{
+                    <svg class="icon text-[10px]" :class="{
                       'text-[var(--color-ok)]': p.last_deploy?.status === 'success',
                       'text-[var(--color-fail)]': p.last_deploy?.status === 'failed'
-                    }"></i>
+                    }" aria-hidden="true"><use href="#icon-code-commit"></use></svg>
                     <span class="truncate" x-text="lastDeploySummary(p)"></span>
                 </div>
 
@@ -145,12 +143,12 @@
                     </div>
                     <div class="flex items-center gap-1">
                         <button @click.stop="goToProject(p)" class="btn-ghost px-2 text-xs" title="Logs">
-                            <i class="fa-solid fa-scroll"></i>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-scroll"></use></svg>
                         </button>
                         <button @click.stop="goToEdit(p)" class="btn-ghost px-2" title="Edit">
-                            <i class="fa-solid fa-pen text-xs"></i>
+                            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-pen"></use></svg>
                         </button>                        <button @click.stop="deleteProject(p)" class="btn-ghost px-2 hover:text-[var(--color-fail)]" title="Delete">
-                            <i class="fa-solid fa-trash text-xs"></i>
+                            <svg class="icon text-xs" aria-hidden="true"><use href="#icon-trash"></use></svg>
                         </button>
                     </div>
                 </div>
@@ -161,12 +159,12 @@
     <!-- Empty State -->
     <div x-show="projects.length === 0 && !loading" class="empty-state">
         <div class="empty-state-icon">
-            <i class="fa-solid fa-rocket"></i>
+            <svg class="icon" aria-hidden="true"><use href="#icon-rocket"></use></svg>
         </div>
         <h3 class="empty-state-title">No projects yet</h3>
         <p class="empty-state-body">Create your first project to start deploying Docker containers.</p>
         <button @click="goToEdit(null)" class="btn-primary mt-6">
-                <i class="fa-solid fa-plus"></i>
+                <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
                 New Project
             </button>
     </div>
@@ -215,7 +213,7 @@
             <div class="flex items-start gap-4">
                 <div class="w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center"
                     style="background:rgba(248,113,113,0.10)">
-                    <i class="fa-solid fa-trash text-[var(--color-fail)] text-sm"></i>
+                <svg class="icon text-[var(--color-fail)] text-sm" aria-hidden="true"><use href="#icon-trash"></use></svg>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-1">Delete project</h3>
@@ -229,7 +227,7 @@
         <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--border-subtle)]">
             <button @click="showDeleteConfirm = false; _pendingDelete = null" class="btn-secondary text-xs">Cancel</button>
             <button @click="confirmDelete()" class="btn-danger text-xs">
-                <i class="fa-solid fa-trash text-xs"></i>
+                <svg class="icon text-xs" aria-hidden="true"><use href="#icon-trash"></use></svg>
                 Delete
             </button>
         </div>

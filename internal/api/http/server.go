@@ -6,9 +6,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
@@ -87,6 +89,16 @@ func NewServer(cfg Config) *Server {
 	// --- Global middleware ---
 	fiberApp.Use(recover.New())
 	fiberApp.Use(requestid.New())
+	// Compress all responses except SSE streams. SSE requires chunked streaming;
+	// compression would buffer the output and break event delivery.
+	fiberApp.Use(compress.New(compress.Config{
+		Level: compress.LevelBestSpeed,
+		Next: func(c *fiber.Ctx) bool {
+			// Skip compression for SSE routes (text/event-stream).
+			p := c.Path()
+			return p == "/api/events" || strings.HasPrefix(p, "/api/deployments/")
+		},
+	}))
 	fiberApp.Use(middleware.Security())
 	fiberApp.Use(cors.New(cors.Config{
 		// Restrict cross-origin requests to the same origin as the configured base URL.

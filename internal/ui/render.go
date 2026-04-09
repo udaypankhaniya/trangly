@@ -136,5 +136,6 @@ func (r *Renderer) Render(c *fiber.Ctx, page string, data PageData) error {
 	}
 
 	c.Set("Content-Type", "text/html; charset=utf-8")
+	c.Set("Cache-Control", "no-store")
 	return c.Send(buf.Bytes())
 }
