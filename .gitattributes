@@ -1,0 +1,28 @@
+# Enforce LF for all files by default
+* text=auto eol=lf
+
+# Shell scripts must always be LF — CRLF breaks shebangs on Linux
+*.sh        text eol=lf
+*.bash      text eol=lf
+*.mjs       text eol=lf
+*.js        text eol=lf
+*.ts        text eol=lf
+*.go        text eol=lf
+*.sql       text eol=lf
+*.html      text eol=lf
+*.css       text eol=lf
+*.json      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.md        text eol=lf
+Makefile    text eol=lf
+
+# Binary files — no line ending conversion
+*.exe       binary
+*.deb       binary
+*.rpm       binary
+*.zip       binary
+*.gz        binary
+*.png       binary
+*.jpg       binary
+*.svg       text eol=lf
