@@ -303,15 +303,7 @@ API → Queue → Scheduler → Engine → Pipeline
 
 See [SECURITY.md](SECURITY.md) to report a vulnerability.
 
----
 
-## Roadmap
-
-- **v1.1** — Auto-TLS via Let's Encrypt; auto-rollback on failed health check
-- **v1.2** — Deploy notifications (Slack, email, webhook)
-- **v2.0** — Multi-user / team support; PR preview environments
-
-See [docs/CHANGELOG.md](docs/CHANGELOG.md) for release history.
 
 ---
 
