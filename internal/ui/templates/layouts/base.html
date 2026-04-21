@@ -5,7 +5,7 @@
   {{template "head" .}}
   {{block "head_extra" .}}{{end}}
 </head>
-<body class="font-sans antialiased" x-data="{{.AlpineData}}" x-cloak>
+<body class="font-sans antialiased noise-overlay" x-data="{{.AlpineData}}" x-cloak>
   {{template "icons" .}}
   {{template "sidebar" .}}
   {{template "mobile_menu" .}}
@@ -33,6 +33,7 @@
   <script src="/static/js/api.js"></script>
   <script src="/static/js/utils.js"></script>
   <script src="/static/js/datatable.js"></script>
+  <script src="/static/js/motion.js"></script>
   {{block "scripts" .}}{{end}}
 </body>
 </html>

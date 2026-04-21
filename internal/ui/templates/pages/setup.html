@@ -4,11 +4,11 @@
     <section class="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center login-hero-grid bg-[var(--bg-lowest)]">
       <div class="absolute inset-0 bg-gradient-to-tr from-[var(--bg-base)] via-transparent to-transparent z-10"></div>
       <div class="relative z-20 text-center px-12">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-6 glow-accent" data-enter="scale" data-enter-delay="100">
           <svg class="icon text-black text-2xl" aria-hidden="true"><use href="#icon-server"></use></svg>
         </div>
-        <h1 class="page-title mb-3">PROVISIONING<br/>NODE_01</h1>
-        <p class="body-sm font-mono text-xs uppercase tracking-widest max-w-xs mx-auto">
+        <h1 class="login-hero-title mb-3" data-enter="slide-up" data-enter-delay="200">PROVISIONING<br/>NODE_01</h1>
+        <p class="login-hero-sub max-w-xs mx-auto" data-enter="fade" data-enter-delay="400">
           System initialization in progress.<br/>Secure admin credentials required.
         </p>
       </div>
@@ -41,7 +41,7 @@
           <!-- Setup Form -->
           <template x-if="!alreadySetup">
             <div>
-              <header class="mb-10">
+              <header class="mb-10" data-enter="slide-up" data-enter-delay="50">
                 <div class="flex items-center gap-2 mb-4">
                   <div class="w-7 h-7 bg-white flex items-center justify-center rounded-sm">
                   <svg class="icon text-black text-xs" aria-hidden="true"><use href="#icon-terminal"></use></svg>
@@ -52,20 +52,38 @@
                 <p class="body-sm font-mono uppercase tracking-widest">One-time setup process</p>
               </header>
 
-              <form @submit.prevent="doSetup()" novalidate class="space-y-5">
+              <form @submit.prevent="doSetup()" novalidate class="space-y-5" data-enter="slide-up" data-enter-delay="150">
                 <div class="space-y-2">
                   <label for="su">Admin Username</label>
-                  <input id="su" type="text" x-model="username" placeholder="e.g. admin" autocomplete="username" autofocus />
+                  <div class="input-wrapper">
+                    <input id="su" type="text" x-model="username" placeholder="e.g. admin" autocomplete="username" autofocus />
+                    <span class="input-icon"><svg class="icon" aria-hidden="true"><use href="#icon-user"></use></svg></span>
+                  </div>
                 </div>
 
                 <div class="space-y-2">
                   <label for="se">Contact Email</label>
-                  <input id="se" type="email" x-model="email" placeholder="admin@example.com" autocomplete="email" />
+                  <div class="input-wrapper">
+                    <input id="se" type="email" x-model="email" placeholder="admin@example.com" autocomplete="email" />
+                    <span class="input-icon"><svg class="icon" aria-hidden="true"><use href="#icon-envelope"></use></svg></span>
+                  </div>
                 </div>
 
                 <div class="space-y-2">
-                  <label for="sp">Master Password</label>
-                  <input id="sp" :type="showPassword ? 'text' : 'password'" x-model="password" placeholder="Min 8 characters" autocomplete="new-password" />
+                  <div class="flex justify-between items-center">
+                    <label for="sp" class="mb-0">Master Password</label>
+                    <button type="button"
+                            class="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                            @click="showPassword = !showPassword"
+                            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                            tabindex="-1">
+                      <span x-text="showPassword ? 'Hide' : 'Show'"></span>
+                    </button>
+                  </div>
+                  <div class="input-wrapper">
+                    <input id="sp" :type="showPassword ? 'text' : 'password'" x-model="password" placeholder="Min 8 characters" autocomplete="new-password" />
+                    <span class="input-icon"><svg class="icon" aria-hidden="true"><use href="#icon-lock"></use></svg></span>
+                  </div>
                   <div class="pt-2 flex flex-col gap-2">
                     <div class="flex gap-1 h-[2px] w-full">
                       <div class="strength-bar" :class="passwordStrength >= 1 ? (passwordStrength === 1 ? 'bg-[var(--color-fail)]' : passwordStrength === 2 ? 'bg-[var(--color-warn)]' : 'bg-[var(--color-ok)]') : 'bg-[var(--bg-elevated)]'"></div>
@@ -80,8 +98,10 @@
 
                 <div class="space-y-2">
                   <label for="sc">Confirm Password</label>
-                  <input id="sc" :type="showPassword ? 'text' : 'password'" x-model="confirmPassword" placeholder="Re-enter password" autocomplete="new-password"
-                         :class="confirmPassword && password !== confirmPassword ? 'border-[var(--color-fail)]' : ''" />
+                  <div class="input-wrapper" :class="confirmPassword && password !== confirmPassword ? 'has-error' : ''">
+                    <input id="sc" :type="showPassword ? 'text' : 'password'" x-model="confirmPassword" placeholder="Re-enter password" autocomplete="new-password" />
+                    <span class="input-icon"><svg class="icon" aria-hidden="true"><use href="#icon-lock"></use></svg></span>
+                  </div>
                   <p x-show="confirmPassword && password !== confirmPassword" class="text-[var(--color-fail)] font-mono text-[10px] mt-1">Passwords do not match</p>
                 </div>
 
@@ -99,7 +119,7 @@
                 </div>
               </form>
 
-              <footer class="mt-10 pt-8 border-t border-[var(--border-subtle)]">
+              <footer class="mt-10 pt-8 border-t border-[var(--border-subtle)]" data-enter="fade" data-enter-delay="300">
                 <div class="flex items-start gap-3">
                   <svg class="icon text-[var(--text-muted)] shrink-0 mt-0.5" aria-hidden="true"><use href="#icon-circle-info"></use></svg>
                   <p class="text-xs text-[var(--text-muted)] leading-relaxed italic">

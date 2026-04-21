@@ -1,3 +1,7 @@
+{{define "head_extra"}}
+<link rel="stylesheet" href="/static/vendor/xterm.css">
+{{end}}
+
 {{define "content"}}
     <!-- Loading State -->
     <div x-show="!project && !loadError" class="flex-1 flex items-center justify-center">
@@ -24,7 +28,7 @@
           </a>
         </div>
 
-        <section class="mb-8">
+        <section class="mb-8" data-enter="slide-up" data-enter-delay="0">
           <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-l-4 border-[var(--accent)] pl-5 py-2">
             <div>
               <div class="flex flex-wrap items-center gap-2 mb-2">
@@ -32,7 +36,7 @@
                 <span class="px-2 py-0.5 bg-[var(--bg-elevated)] text-[10px] font-mono border border-[var(--border-default)] text-[var(--text-muted)] uppercase tracking-widest"
                       x-text="currentStatus"></span>
                 <span x-show="project.deploy_mode === 'hot_swap'"
-                      class="px-2 py-0.5 bg-purple-500/15 text-purple-400 text-[10px] font-mono border border-purple-500/30 uppercase tracking-widest">
+                      class="px-2 py-0.5 bg-[rgba(var(--color-running-rgb),0.15)] text-[var(--color-running)] text-[10px] font-mono border border-[rgba(var(--color-running-rgb),0.3)] uppercase tracking-widest">
                   Hot Swap
                 </span>
               </div>
@@ -70,6 +74,7 @@
         <div class="tab-bar mb-6">
           <button @click="switchTab('logs')" class="tab-item" :class="{ 'active': tab === 'logs' }">Logs</button>
           <button @click="switchTab('history')" class="tab-item" :class="{ 'active': tab === 'history' }">History</button>
+          <button @click="switchTab('terminal')" class="tab-item" :class="{ 'active': tab === 'terminal' }">Terminal</button>
         </div>
 
         <!-- Logs Tab -->
@@ -86,7 +91,7 @@
                       <svg class="icon" x-show="phaseState(phase) === 'done'" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
                       <svg class="icon" x-show="phaseState(phase) === 'active' && job?.status === 'failed'" aria-hidden="true"><use href="#icon-circle-xmark"></use></svg>
                       <svg class="icon icon-spin" x-show="phaseState(phase) === 'active' && job?.status !== 'failed'" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
-                      <svg class="icon" style="opacity:0.4" x-show="phaseState(phase) !== 'done' && phaseState(phase) !== 'active'" aria-hidden="true"><use href="#icon-circle"></use></svg>
+                      <svg class="icon opacity-40" x-show="phaseState(phase) !== 'done' && phaseState(phase) !== 'active'" aria-hidden="true"><use href="#icon-circle"></use></svg>
                     </span>
                     <span class="ps-step-body">
                       <span class="ps-step-label" x-text="phase.replace(/_/g,' ')"></span>
@@ -113,8 +118,8 @@
                 <span class="label-mono">Output</span>
                 <template x-if="['running','building','health_check','swapping','hot_swapping'].includes(job?.status || '')">
                   <div class="flex items-center gap-1.5">
-                    <span class="inline-block w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
-                    <span class="text-[10px] font-mono uppercase tracking-widest text-yellow-400">Live</span>
+                    <span class="inline-block w-2 h-2 rounded-full bg-[var(--color-warn)] animate-pulse"></span>
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-[var(--color-warn)]">Live</span>
                   </div>
                 </template>
               </div>
@@ -196,8 +201,72 @@
           </div>
         </section>
 
+        <!-- Terminal Tab -->
+        <section x-show="tab === 'terminal'" x-cloak>
+
+          <!-- Loading state -->
+          <div x-show="termLoading && containers.length === 0" class="term-empty">
+            <svg class="icon icon-spin text-xl text-[var(--text-muted)]" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+          </div>
+
+          <!-- No containers -->
+          <div x-show="!termLoading && containers.length === 0" class="term-empty">
+            <svg class="icon text-3xl text-[var(--text-muted)] mb-3 block" aria-hidden="true"><use href="#icon-terminal"></use></svg>
+            <p class="text-sm text-[var(--text-muted)] mb-4">No running containers found</p>
+            <button @click="loadContainers()" class="btn-ghost text-xs font-mono inline-flex items-center gap-1.5">
+              <svg class="icon text-xs" aria-hidden="true"><use href="#icon-arrows-rotate"></use></svg> Retry
+            </button>
+          </div>
+
+          <!-- Container list + terminal -->
+          <template x-if="containers.length > 0">
+            <div>
+              <!-- Container chips -->
+              <div class="term-chip-bar">
+                <template x-for="ct in containers" :key="ct.id">
+                  <button class="term-chip"
+                          :class="{ 'term-chip--active': selectedContainer === ct.id }"
+                          @click="selectContainer(ct.id)">
+                    <span class="term-chip-dot" :class="ct.state === 'running' ? 'term-chip-dot--ok' : 'term-chip-dot--off'"></span>
+                    <span class="term-chip-name" x-text="ct.name"></span>
+                    <span class="term-chip-image" x-text="ct.image.split(':')[0].split('/').pop()"></span>
+                  </button>
+                </template>
+
+                <!-- Right side actions -->
+                <div class="term-chip-actions">
+                  <button @click="loadContainers()" class="term-action-btn" :disabled="termLoading" title="Refresh containers">
+                    <svg class="icon text-xs" :class="{'icon-spin': termLoading}" aria-hidden="true">
+                      <use :href="termLoading ? '#icon-circle-notch' : '#icon-arrows-rotate'"></use>
+                    </svg>
+                  </button>
+                  <button x-show="termConnected" @click="disconnectTerminal()" class="term-action-btn term-action-btn--danger" title="Disconnect">
+                    <svg class="icon text-xs" aria-hidden="true"><use href="#icon-xmark"></use></svg>
+                  </button>
+                  <button x-show="!termConnected && selectedContainer" @click="connectTerminal()" class="term-action-btn term-action-btn--connect" title="Reconnect">
+                    <svg class="icon text-xs" aria-hidden="true"><use href="#icon-terminal"></use></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Terminal viewport -->
+              <div class="term-viewport">
+                <!-- Connection status bar -->
+                <div class="term-status-bar">
+                  <div class="flex items-center gap-2">
+                    <span class="term-status-dot" :class="termConnected ? 'term-status-dot--live' : 'term-status-dot--off'"></span>
+                    <span class="term-status-label" x-text="termConnected ? 'Connected' : (selectedContainer ? 'Disconnected' : 'Select a container')"></span>
+                  </div>
+                  <span x-show="termConnected" class="term-status-label" x-text="containers.find(c => c.id === selectedContainer)?.name || ''"></span>
+                </div>
+                <div id="terminal-el" class="terminal-xterm"></div>
+              </div>
+            </div>
+          </template>
+        </section>
+
         <!-- Context Grid -->
-        <section class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <section class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4" data-enter="slide-up" data-enter-delay="150">
           <div class="bg-[var(--bg-surface)] p-4 border border-[var(--border-default)] rounded-lg">
             <div class="flex items-center justify-between mb-3">
               <span class="label-mono">Branch</span>
@@ -232,5 +301,7 @@
 {{end}}
 
 {{define "scripts"}}
+  <script src="/static/vendor/xterm.js"></script>
+  <script src="/static/vendor/xterm-addon-fit.js"></script>
   <script src="/static/js/project.js"></script>
 {{end}}

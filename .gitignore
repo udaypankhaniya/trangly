@@ -6,7 +6,7 @@ dist/
 # Exception: compiled CSS is a committed artifact (go:embed needs it at build time)
 !internal/ui/static/dist/
 !internal/ui/static/dist/style.min.css
-
+/graphify-out
 docker-compose.yml
 Dockerfile
 # Coverage
@@ -17,6 +17,10 @@ coverage.html
 *.exe
 *.exe~
 trangly.exe
+scripts/test-deb/trangly
+node_modules/
+.agents/
+skills/
 
 # Go workspace files
 go.work

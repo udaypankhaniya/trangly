@@ -13,7 +13,10 @@ import (
 // trustProxy controls whether the X-Forwarded-For header is trusted for IP extraction.
 // Set trustProxy=true only when the app is running behind a known trusted reverse proxy;
 // when false, the real socket address (c.IP()) is always used to prevent header spoofing.
-func RateLimit(maxReq int, window time.Duration, trustProxy bool) fiber.Handler {
+//
+// The done channel controls the cleanup goroutine's lifetime; close it to stop the goroutine.
+// Typically pass the server's shutdown signal (e.g. context.Done()).
+func RateLimit(maxReq int, window time.Duration, trustProxy bool, done <-chan struct{}) fiber.Handler {
 	type bucket struct {
 		count   int
 		resetAt time.Time
@@ -22,16 +25,23 @@ func RateLimit(maxReq int, window time.Duration, trustProxy bool) fiber.Handler 
 	buckets := make(map[string]*bucket)
 
 	// Periodic cleanup of stale entries every 5 minutes.
+	ticker := time.NewTicker(5 * time.Minute)
 	go func() {
-		for range time.Tick(5 * time.Minute) { //nolint:staticcheck
-			mu.Lock()
-			now := time.Now()
-			for ip, b := range buckets {
-				if now.After(b.resetAt) {
-					delete(buckets, ip)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				mu.Lock()
+				now := time.Now()
+				for ip, b := range buckets {
+					if now.After(b.resetAt) {
+						delete(buckets, ip)
+					}
 				}
+				mu.Unlock()
 			}
-			mu.Unlock()
 		}
 	}()
 

@@ -7,6 +7,7 @@ package deploy
 import (
 	"fmt"
 	"log/slog"
+	"os"
 	"path/filepath"
 
 	"github.com/udaypankhaniya/trangly/internal/domain"
@@ -51,4 +52,16 @@ func stageErr(stage string, err error) error {
 // Uses the job ID (not the SHA) so the path is stable even when HEAD is resolved.
 func (p *Pipeline) WorkspaceDir(job *domain.DeployJob) string {
 	return filepath.Join(p.WorkspacesDir, job.ProjectID, job.ID)
+}
+
+// composeEnv returns a copy of the current process environment with
+// COMPOSE_PROJECT_NAME set. The copy prevents races when concurrent builds
+// append to the shared backing array returned by os.Environ().
+func composeEnv(projectSlug string, extra ...string) []string {
+	base := os.Environ()
+	env := make([]string, len(base), len(base)+1+len(extra))
+	copy(env, base)
+	env = append(env, "COMPOSE_PROJECT_NAME="+projectSlug)
+	env = append(env, extra...)
+	return env
 }

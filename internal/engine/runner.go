@@ -1,3 +1,6 @@
+// Package engine executes deploy jobs end-to-end.
+// runner.go calls pipeline stages, supervisor.go manages goroutine lifecycle,
+// and context.go handles cancellation and timeout propagation.
 package engine
 
 import (
@@ -8,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/udaypankhaniya/trangly/internal/api/sse"
 	"github.com/udaypankhaniya/trangly/internal/deploy"
@@ -71,11 +75,6 @@ func (r *Runner) Run(ctx context.Context, job *domain.DeployJob) error {
 	defer logFile.Close()
 	logW := r.newBroadcastWriter(logFile, job.ID)
 
-	// Mark job as started.
-	if err := r.queue.MarkStarted(job.ID, 0); err != nil {
-		return r.fail(job, fmt.Errorf("mark started: %w", err))
-	}
-
 	// Load project and credentials.
 	project, err := r.db.GetProject(job.ProjectID)
 	if err != nil {
@@ -101,7 +100,8 @@ func (r *Runner) Run(ctx context.Context, job *domain.DeployJob) error {
 	repoURL := "https://github.com/" + project.RepoFullName + ".git"
 	projectSlug := safeSlug(project.Name)
 
-	// --- FETCH --- (already in "running" state from MarkStarted above)
+	// --- FETCH --- (job is already in "running" state; MarkStarted was called
+	// by the scheduler synchronously before this goroutine was spawned.)
 	if err := r.pipeline.FetchStage(jobCtx, job, repoURL, token, logW); err != nil {
 		return r.fail(job, err)
 	}
@@ -262,7 +262,8 @@ func (r *Runner) getInstallationToken(ctx context.Context, installationID int64)
 }
 
 func (r *Runner) setCommitStatus(job *domain.DeployJob, repoFullName, token, state string) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	desc := "Deploy succeeded"
 	if state != domain.CommitStatusSuccess {
 		desc = "Deploy failed"
@@ -272,11 +273,11 @@ func (r *Runner) setCommitStatus(job *domain.DeployJob, repoFullName, token, sta
 	}
 }
 
-// cleanup runs CleanupStage on a background context so it always completes
-// even if the job context was cancelled.
-func cleanup(r *Runner, ctx context.Context, job *domain.DeployJob, projectSlug string, succeeded bool, logW io.Writer) {
-	cleanCtx := context.Background()
-	_ = ctx
+// cleanup runs CleanupStage on a background context with a 2-minute timeout so
+// it always completes even if the job context was cancelled, but never hangs indefinitely.
+func cleanup(r *Runner, _ context.Context, job *domain.DeployJob, projectSlug string, succeeded bool, logW io.Writer) {
+	cleanCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
 	r.pipeline.CleanupStage(cleanCtx, job, projectSlug, succeeded, logW)
 }
 

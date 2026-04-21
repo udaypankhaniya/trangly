@@ -26,7 +26,7 @@
     </div>
 
     <!-- Main form -->
-    <div x-show="!projectLoading && !pageError">
+    <div x-show="!projectLoading && !pageError" data-enter="slide-up" data-enter-delay="0">
 
         <!-- Page header -->
         <div class="flex items-center gap-3 mb-6">
@@ -65,7 +65,13 @@
         <form autocomplete="off" @submit.prevent class="max-w-2xl">
 
             <!-- ── GENERAL TAB ─────────────────────────────────────── -->
-            <div x-show="activeTab === 'general'" class="space-y-5">
+            <div x-show="activeTab === 'general'">
+              <div class="bento-card">
+                <div class="bento-card-header">
+                    <svg class="icon text-sm" aria-hidden="true"><use href="#icon-sliders"></use></svg>
+                    <span class="font-mono text-xs font-bold uppercase tracking-widest">Configuration</span>
+                </div>
+                <div class="bento-card-body space-y-5">
 
                 <!-- Repository -->
                 <div class="space-y-2">
@@ -123,6 +129,12 @@
                                 placeholder="main" />
                             <span x-show="branchesLoading" class="absolute right-2 top-1/2 -translate-y-1/2">
                                 <svg class="icon icon-spin text-[var(--text-muted)] text-sm" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label>Compose File</label>
+                        <div class="relative">
                             <select x-show="composeFiles.length > 0" x-model="form.compose_path" class="w-full">
                                 <template x-for="f in composeFiles" :key="f">
                                     <option :value="f" x-text="f"></option>
@@ -172,10 +184,19 @@
                     <input type="number" x-model.number="form.mem_limit_mb" min="0" placeholder="0" class="w-48" />
                 </div>
 
+                </div><!-- /bento-card-body -->
+              </div><!-- /bento-card -->
             </div><!-- /general tab -->
 
             <!-- ── ENV TAB ─────────────────────────────────────────── -->
             <div x-show="activeTab === 'env'">
+              <div class="bento-card">
+                <div class="bento-card-header">
+                    <svg class="icon text-sm" aria-hidden="true"><use href="#icon-lock"></use></svg>
+                    <span class="font-mono text-xs font-bold uppercase tracking-widest">Environment Variables</span>
+                    <span class="ml-auto font-mono text-[9px] uppercase tracking-widest text-[var(--text-muted)]">AES-256 encrypted</span>
+                </div>
+                <div class="bento-card-body">
 
                 <!-- Loading -->
                 <div x-show="envLoading" class="flex items-center gap-2 text-sm text-[var(--text-muted)] py-6">
@@ -248,6 +269,8 @@
                     </div>
                 </div>
 
+                </div><!-- /bento-card-body -->
+              </div><!-- /bento-card -->
             </div><!-- /env tab -->
 
             <!-- ── Error + Actions ─────────────────────────────────── -->

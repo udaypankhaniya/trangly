@@ -1,3 +1,5 @@
+// Package scheduler runs a 5-second loop that picks pending deploy jobs and
+// delegates them to the engine, respecting RAM budget constraints.
 package scheduler
 
 import (
@@ -24,6 +26,12 @@ type JobRunner interface {
 	Run(ctx context.Context, job *domain.DeployJob) error
 }
 
+// JobSupervisor is the interface the scheduler uses to spawn tracked goroutines.
+// Implemented by engine.Supervisor — kept as an interface to avoid importing engine.
+type JobSupervisor interface {
+	Spawn(jobID string, fn func(ctx context.Context)) error
+}
+
 // Scheduler runs a 5-second loop that decides which jobs can execute given RAM availability.
 // It NEVER executes jobs itself — it delegates to the engine via JobRunner.
 type Scheduler struct {
@@ -31,12 +39,13 @@ type Scheduler struct {
 	queue        *queue.Manager
 	monitor      *Monitor
 	runner       JobRunner
+	supervisor   JobSupervisor
 	availableRAM int64 // computed once at startup (MB)
 	log          *slog.Logger
 }
 
 // NewScheduler creates a Scheduler and computes the RAM budget at startup.
-func NewScheduler(database *db.DB, qm *queue.Manager, mon *Monitor, runner JobRunner) (*Scheduler, error) {
+func NewScheduler(database *db.DB, qm *queue.Manager, mon *Monitor, runner JobRunner, supervisor JobSupervisor) (*Scheduler, error) {
 	mem, err := system.ReadMemInfo()
 	if err != nil {
 		return nil, err
@@ -53,6 +62,7 @@ func NewScheduler(database *db.DB, qm *queue.Manager, mon *Monitor, runner JobRu
 		queue:        qm,
 		monitor:      mon,
 		runner:       runner,
+		supervisor:   supervisor,
 		availableRAM: availableRAM,
 		log: slog.Default().With(
 			"component", "scheduler",
@@ -129,6 +139,20 @@ func (s *Scheduler) tick(ctx context.Context) {
 	// Check for stuck jobs (running/building/swapping too long).
 	s.monitor.CheckStuck(ctx, activeJobs)
 
+	// Un-hold any held jobs that now fit within the available RAM budget.
+	// This runs after monitor checks so that 30+ min auto-fail takes priority.
+	for _, j := range heldJobs {
+		if j.RAMEstimateMB <= effective {
+			if err := s.queue.UpdateStatus(j.ID, domain.StatusPending); err != nil {
+				// Job may have just been auto-failed by CheckHeld — skip silently.
+				s.log.DebugContext(ctx, "could not un-hold job", "job_id", j.ID, "err", err)
+				continue
+			}
+			s.log.InfoContext(ctx, "un-held job, RAM now available",
+				"job_id", j.ID, "estimate_mb", j.RAMEstimateMB, "effective_mb", effective)
+		}
+	}
+
 	// Pick next pending job for execution.
 	next, err := s.queue.NextPendingAny()
 	if err != nil {
@@ -156,14 +180,26 @@ func (s *Scheduler) tick(ctx context.Context) {
 		return
 	}
 
-	// Enough RAM — delegate to engine.
+	// Enough RAM — mark the job as started NOW, before launching the goroutine.
+	// This is critical: it ensures the next scheduler tick's runningRAM sum
+	// includes this job immediately, preventing TOCTOU races where multiple
+	// goroutines are dispatched while the job is still visible as "pending".
+	if err := s.queue.MarkStarted(next.ID, 0); err != nil {
+		s.log.ErrorContext(ctx, "could not mark job started, aborting dispatch",
+			"job_id", next.ID, "err", err)
+		return
+	}
+
 	s.log.InfoContext(ctx, "delegating job to engine",
 		"job_id", next.ID, "estimate_mb", next.RAMEstimateMB)
-	go func(job *domain.DeployJob) {
-		if err := s.runner.Run(ctx, job); err != nil {
-			s.log.ErrorContext(ctx, "job execution error", "job_id", job.ID, "err", err)
+	if err := s.supervisor.Spawn(next.ID, func(ctx context.Context) {
+		if err := s.runner.Run(ctx, next); err != nil {
+			s.log.ErrorContext(ctx, "job execution error", "job_id", next.ID, "err", err)
 		}
-	}(next)
+	}); err != nil {
+		s.log.ErrorContext(ctx, "could not spawn job goroutine",
+			"job_id", next.ID, "err", err)
+	}
 }
 
 func min64(a, b int64) int64 {

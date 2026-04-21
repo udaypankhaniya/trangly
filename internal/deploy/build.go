@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -27,10 +26,7 @@ func (p *Pipeline) BuildStage(ctx context.Context, job *domain.DeployJob, projec
 	cmd.Dir = workspaceDir
 	cmd.Stdout = logW
 	cmd.Stderr = logW
-	cmd.Env = append(os.Environ(),
-		"COMPOSE_PROJECT_NAME="+projectSlug,
-		"DOCKER_BUILDKIT=1",
-	)
+	cmd.Env = composeEnv(projectSlug, "DOCKER_BUILDKIT=1")
 	cmd.Cancel = func() error { return cmd.Process.Kill() }
 
 	if err := cmd.Run(); err != nil {
@@ -60,7 +56,7 @@ func (p *Pipeline) BuildStage(ctx context.Context, job *domain.DeployJob, projec
 func discoverComposeImage(ctx context.Context, workspaceDir, projectSlug string) string {
 	cmd := exec.CommandContext(ctx, "docker", "compose", "config", "--images") //nolint:gosec
 	cmd.Dir = workspaceDir
-	cmd.Env = append(os.Environ(), "COMPOSE_PROJECT_NAME="+projectSlug)
+	cmd.Env = composeEnv(projectSlug)
 	out, err := cmd.Output()
 	if err != nil {
 		return ""

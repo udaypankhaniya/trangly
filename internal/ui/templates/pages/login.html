@@ -3,21 +3,21 @@
 {{define "content"}}
   <main class="flex min-h-screen">
     <!-- Left: CSS grid hero (desktop only) -->
-    <section class="hidden lg:flex lg:w-5/12 relative overflow-hidden items-center justify-center login-hero-grid">
+    <section class="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center login-hero-grid">
       <div class="absolute inset-0 bg-gradient-to-tr from-[var(--bg-base)] via-transparent to-transparent z-10"></div>
       <div class="relative z-20 text-center px-12">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-xl mb-6 glow-accent" data-enter="scale" data-enter-delay="100">
           <svg class="icon text-black text-2xl" aria-hidden="true"><use href="#icon-terminal"></use></svg>
         </div>
-        <h2 class="page-title mb-3">Push. Deploy. Done.</h2>
-        <p class="body-sm font-mono text-xs uppercase tracking-widest max-w-xs mx-auto">
+        <h2 class="login-hero-title mb-3" data-enter="slide-up" data-enter-delay="200">Push. Deploy. Done.</h2>
+        <p class="login-hero-sub max-w-xs mx-auto" data-enter="fade" data-enter-delay="400">
           Self-hosted Docker CI/CD for solo developers.
         </p>
       </div>
     </section>
 
     <!-- Right: Login Form -->
-    <section class="w-full lg:w-7/12 flex flex-col relative bg-[var(--bg-base)]">
+    <section class="w-full lg:w-1/2 flex flex-col relative bg-[var(--bg-base)]">
       <!-- Theme toggle -->
       <button id="theme-toggle" class="absolute top-4 right-4 lg:top-6 lg:right-6 btn-ghost px-2 z-20" aria-label="Toggle theme">
         <svg class="icon" id="theme-icon" aria-hidden="true"><use href="#icon-moon"></use></svg>
@@ -27,7 +27,7 @@
       <div class="flex-1 flex items-center justify-center px-6 sm:px-12">
         <div class="w-full max-w-[400px]">
           <!-- Logo wordmark -->
-          <div class="mb-10">
+          <div class="mb-10" data-enter="slide-up" data-enter-delay="50">
             <div class="flex items-center gap-2 mb-4">
               <div class="w-7 h-7 bg-white flex items-center justify-center rounded-sm">
                 <svg class="icon text-black text-xs" aria-hidden="true"><use href="#icon-terminal"></use></svg>
@@ -45,7 +45,7 @@
           </div>
 
           <!-- Form -->
-          <form @submit.prevent="doLogin()" novalidate class="space-y-5">
+          <form @submit.prevent="doLogin()" novalidate class="space-y-5" data-enter="slide-up" data-enter-delay="150">
             <!-- Username -->
             <div :class="{ 'has-error': errors.username }">
               <label for="un">Username</label>
@@ -99,7 +99,7 @@
           </form>
 
           <!-- Footer -->
-          <div class="mt-10 pt-6 border-t border-[var(--border-subtle)]">
+          <div class="mt-10 pt-6 border-t border-[var(--border-subtle)]" data-enter="fade" data-enter-delay="300">
             <p class="font-mono text-[10px] uppercase tracking-widest text-[var(--text-muted)] text-center">
               Single-admin access &mdash; AES-256-GCM encrypted session
             </p>

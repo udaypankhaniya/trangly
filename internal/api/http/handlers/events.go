@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -29,6 +30,10 @@ func (h *EventsHandler) Stream(c *fiber.Ctx) error {
 		return respondError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	initial, _ := json.Marshal(fiber.Map{"jobs": jobs})
+	initial, err := json.Marshal(fiber.Map{"jobs": jobs})
+	if err != nil {
+		slog.Warn("events: failed to marshal initial snapshot", "err", err)
+		initial = []byte(`{"jobs":[]}`)
+	}
 	return h.broadcaster.StreamDashboard(c, string(initial))
 }

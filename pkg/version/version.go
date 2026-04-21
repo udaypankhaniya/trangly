@@ -8,9 +8,9 @@ package version
 //	                    -X github.com/udaypankhaniya/trangly/pkg/version.Commit=abc1234 \
 //	                    -X github.com/udaypankhaniya/trangly/pkg/version.BuildDate=2025-01-01"
 var (
-	Version   = "dev"     // semantic version e.g. "1.0.0"
+	Version   = "dev"            // semantic version e.g. "1.0.0"
 	Commit    = "udaypankhaniya" // short git SHA e.g. "abc1234"
-	BuildDate = "2026-04-02" // ISO date e.g. "2025-01-01"
+	BuildDate = "2026-04-02"     // ISO date e.g. "2025-01-01"
 )
 
 const (

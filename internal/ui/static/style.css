@@ -70,9 +70,15 @@
   --radius-xl: 0.5rem;
   --radius-full: 0.75rem;
 
+  /* Custom Easings */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+
   /* Animations & Keyframes */
-  --animate-fade-in: fadeIn 0.3s ease-out;
-  --animate-slide-in: slideIn 0.3s ease-out;
+  --animate-fade-in: fadeIn 0.4s var(--ease-out-expo);
+  --animate-slide-in: slideIn 0.4s var(--ease-out-expo);
   --animate-pulse-dot: pulseDot 1.5s ease-in-out infinite;
   --animate-pulse-yellow: pulseYellow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
@@ -142,7 +148,7 @@
   /* Text */
   --text-primary: #ededed;
   --text-secondary: #a1a1a1;
-  --text-muted: #525252;
+  --text-muted: #737373;
   --text-inverse: #000000;
 
   /* Accent */
@@ -177,6 +183,8 @@
   --text-secondary-rgb: 161, 161, 161;
   --bg-overlay-rgb: 31, 31, 31;
   --color-fail-rgb: 248, 113, 113;
+  --color-warn-rgb: 250, 204, 21;
+  --color-running-rgb: 192, 132, 252;
 }
 
 [data-theme="light"] {
@@ -223,6 +231,8 @@
   --text-secondary-rgb: 82, 82, 82;
   --bg-overlay-rgb: 255, 255, 255;
   --color-fail-rgb: 220, 38, 38;
+  --color-warn-rgb: 202, 138, 4;
+  --color-running-rgb: 147, 51, 234;
 }
 
 /* -- 2. Typography ------------------------------------------------- */
@@ -484,8 +494,9 @@ a {
   width: 220px;
   display: flex;
   flex-direction: column;
-  background: var(--bg-lowest);
-  border-right: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-lowest) 92%, transparent);
+  backdrop-filter: blur(16px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
   z-index: 40;
   overflow-y: auto;
 }
@@ -509,37 +520,6 @@ a {
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.sidebar-search-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: calc(100% - 16px);
-  margin: 8px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: var(--bg-raised);
-  border: 1px solid var(--border-default);
-  color: var(--text-muted);
-  font-size: 12px;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 150ms;
-}
-
-.sidebar-search-trigger:hover {
-  border-color: var(--border-strong);
-  color: var(--text-secondary);
-}
-
-.sidebar-search-trigger kbd {
-  margin-left: auto;
-  font-size: 10px;
-  background: var(--bg-elevated);
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-family: var(--font-mono);
-}
-
 .sidebar-nav {
   flex: 1;
   display: flex;
@@ -557,13 +537,16 @@ a {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
-  transition: background 150ms ease, color 150ms ease;
+  transition: background 250ms var(--ease-out-expo),
+              color 250ms var(--ease-out-expo),
+              transform 250ms var(--ease-out-expo);
   text-decoration: none;
 }
 
 .sidebar-link:hover {
   background: var(--bg-raised);
   color: var(--text-primary);
+  transform: translateX(2px);
 }
 
 .sidebar-link--active {
@@ -643,12 +626,18 @@ a {
   left: 0;
   right: 0;
   height: 48px;
-  background: var(--bg-lowest);
+  background: color-mix(in srgb, var(--bg-lowest) 85%, transparent);
+  backdrop-filter: blur(12px) saturate(180%);
   border-bottom: 1px solid var(--border-subtle);
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
   z-index: 50;
+  transition: transform 350ms var(--ease-out-expo);
+}
+
+.mobile-topbar--hidden {
+  transform: translateY(-100%);
 }
 
 /* Mobile adjustments */
@@ -960,6 +949,189 @@ a {
   overflow-y: auto;
 }
 
+/* -- 7b. Terminal -------------------------------------------------- */
+
+/* Empty / loading state centered placeholder */
+.term-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+}
+
+/* Chip bar — container selector row */
+.term-chip-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 10px 10px 0 0;
+  border-bottom: none;
+  overflow-x: auto;
+}
+
+/* Individual container chip */
+.term-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.625rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.term-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+.term-chip--active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Status dot inside chip */
+.term-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.term-chip-dot--ok {
+  background: var(--color-ok);
+  box-shadow: 0 0 4px var(--color-ok);
+}
+.term-chip-dot--off {
+  background: var(--text-muted);
+  opacity: 0.5;
+}
+
+.term-chip-name {
+  font-weight: 600;
+}
+.term-chip-image {
+  color: var(--text-muted);
+  font-size: 0.625rem;
+  opacity: 0.7;
+}
+
+/* Right-side action cluster */
+.term-chip-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--border-default);
+}
+
+.term-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.term-action-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+.term-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.term-action-btn--danger:hover {
+  background: var(--bg-fail);
+  color: var(--color-fail);
+  border-color: rgba(var(--color-fail-rgb), 0.3);
+}
+.term-action-btn--connect:hover {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Terminal viewport wrapper */
+.term-viewport {
+  background: #000000;
+  border: 1px solid var(--border-default);
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+
+/* Thin status bar between chip bar and xterm surface */
+.term-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: #0a0a0a;
+}
+
+.term-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  transition: background 400ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.term-status-dot--live {
+  background: var(--color-ok);
+  box-shadow: 0 0 6px var(--color-ok);
+  animation: term-pulse 2s infinite;
+}
+.term-status-dot--off {
+  background: var(--text-muted);
+  opacity: 0.4;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes term-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+}
+
+.term-status-label {
+  font-size: 0.625rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* xterm surface */
+.terminal-xterm {
+  width: 100%;
+  height: 500px;
+  padding: 0.5rem;
+}
+
+.terminal-xterm .xterm {
+  height: 100%;
+}
+
+.terminal-xterm .xterm-viewport {
+  overflow-y: auto !important;
+}
+
 .log-line-num {
   user-select: none;
   color: var(--text-muted);
@@ -1227,8 +1399,22 @@ a {
   white-space: nowrap;
 }
 
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.88;
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover:not(:disabled) {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-primary {
+  transition: opacity 300ms var(--ease-out-expo),
+              transform 300ms var(--ease-out-expo),
+              box-shadow 300ms var(--ease-out-expo);
 }
 
 .btn-primary:disabled {
@@ -1252,9 +1438,18 @@ a {
   transition: background 150ms, border-color 150ms;
 }
 
-.btn-secondary:hover:not(:disabled) {
-  background: var(--bg-raised);
-  border-color: var(--border-strong);
+.btn-secondary {
+  transition: background 300ms var(--ease-out-expo),
+              border-color 300ms var(--ease-out-expo),
+              transform 300ms var(--ease-out-expo);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--bg-raised);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
 }
 
 .btn-ghost {
@@ -1328,15 +1523,17 @@ a {
 /* -- 14. Typography Scale ------------------------------------------ */
 
 .page-title {
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.25rem, 2vw + 0.5rem, 1.625rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .section-title {
-  font-size: 15px;
+  font-size: clamp(0.875rem, 1.2vw + 0.25rem, 1rem);
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 
@@ -1451,11 +1648,11 @@ a {
   }
 
   .animate-modal {
-    animation: modalIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: modalIn 350ms var(--ease-out-expo);
   }
 
   .animate-toast {
-    animation: toastIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: toastIn 350ms var(--ease-out-expo);
   }
 
   .status-pulse {
@@ -1463,7 +1660,7 @@ a {
   }
 
   .animate-slide-in-left {
-    animation: slideInLeft 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideInLeft 350ms var(--ease-out-expo);
   }
 
   @keyframes iconSpin {
@@ -1476,13 +1673,6 @@ a {
     }
   }
 
-  .icon {
-    width: 1em;
-    height: 1em;
-    display: inline-block;
-    vertical-align: -0.125em;
-  }
-
   .icon-spin {
     animation: iconSpin 1s linear infinite;
   }
@@ -1490,6 +1680,14 @@ a {
   .fa-spin {
     animation: iconSpin 1s linear infinite;
   }
+}
+
+/* Icon base styles (always active, not motion-dependent) */
+.icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.125em;
 }
 
 /* -- 16. Tom Select - Themed Overrides ----------------------------- */
@@ -1716,12 +1914,21 @@ a {
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: 8px;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color 350ms var(--ease-out-expo),
+              box-shadow 350ms var(--ease-out-expo),
+              transform 350ms var(--ease-out-expo);
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--border-strong);
+  }
 }
 
 .project-card:hover {
   border-color: var(--border-strong);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .project-card--failing {
@@ -1971,12 +2178,12 @@ a {
 
 .ps-step--active {
   background: var(--bg-raised);
-  box-shadow: 3px 0 0 0 var(--accent);
+  border-right: 3px solid var(--accent);
 }
 
 .ps-step--failed {
   background: rgba(248, 113, 113, 0.06);
-  box-shadow: 3px 0 0 0 var(--color-fail);
+  border-right: 3px solid var(--color-fail);
 }
 
 .ps-step--pending {
@@ -2064,11 +2271,13 @@ a {
   }
 
   .ps-step--active {
-    box-shadow: 0 3px 0 0 var(--accent);
+    border-right: none;
+    border-bottom: 3px solid var(--accent);
   }
 
   .ps-step--failed {
-    box-shadow: 0 3px 0 0 var(--color-fail);
+    border-right: none;
+    border-bottom: 3px solid var(--color-fail);
   }
 
   .ps-step-meta {
@@ -2082,4 +2291,172 @@ a {
   flex: 1;
   border-radius: 1px;
   transition: background 200ms ease;
+}
+
+/* -- 24. Noise / Grain Texture Overlay ----------------------------- */
+
+.noise-overlay::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+  mix-blend-mode: overlay;
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 9990;
+}
+
+[data-theme="light"] .noise-overlay::after {
+  opacity: 0.015;
+}
+
+/* -- 26. Entrance Animation System --------------------------------- */
+/* Elements with [data-enter] start invisible and animate in when
+   IntersectionObserver triggers. Uses only transform + opacity. */
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-enter] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 600ms var(--ease-smooth),
+                transform 600ms var(--ease-smooth);
+  }
+
+  [data-enter="fade"] {
+    transform: none;
+  }
+
+  [data-enter="slide-up"] {
+    transform: translateY(24px);
+  }
+
+  [data-enter="slide-right"] {
+    transform: translateX(-20px);
+  }
+
+  [data-enter="scale"] {
+    transform: scale(0.95);
+  }
+
+  [data-enter].entered {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reduced motion: skip entrance, show immediately */
+@media (prefers-reduced-motion: reduce) {
+  [data-enter] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* -- 28. Glow Effects (Cyber / Technical) -------------------------- */
+
+.glow-ok {
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.15),
+              0 0 0 1px var(--color-ok);
+}
+
+.glow-fail {
+  box-shadow: 0 0 20px rgba(248, 113, 113, 0.15),
+              0 0 0 1px var(--color-fail);
+}
+
+.glow-running {
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.15),
+              0 0 0 1px var(--color-running);
+}
+
+.glow-accent {
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.08),
+              0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="light"] .glow-accent {
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.06),
+              0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* -- 29. Glass Card Utility ---------------------------------------- */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* -- 30. Login Hero Enhancement ------------------------------------ */
+
+.login-hero-grid {
+  background-image:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: center;
+}
+
+.login-hero-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.login-hero-sub {
+  font-family: var(--font-mono);
+  font-size: clamp(0.625rem, 1vw, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+
+/* -- 31. Focus Ring Enhancement ------------------------------------ */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* -- 32. Bento Card Hover ------------------------------------------ */
+
+@media (hover: hover) and (pointer: fine) {
+  .bento-card {
+    transition: border-color 350ms var(--ease-out-expo),
+                box-shadow 350ms var(--ease-out-expo),
+                transform 350ms var(--ease-out-expo);
+  }
+
+  .bento-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+}
+
+/* -- 33. Stat Counter Animation ------------------------------------ */
+
+@media (prefers-reduced-motion: no-preference) {
+  .stat-value {
+    transition: opacity 500ms var(--ease-out-expo),
+                transform 500ms var(--ease-out-expo);
+  }
+}
+
+/* -- 34. Layout Containment for Scroll Performance ----------------- */
+
+.page-shell {
+  contain: layout style;
+}
+
+.log-viewer {
+  contain: layout style;
 }

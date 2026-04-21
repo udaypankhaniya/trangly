@@ -5,11 +5,12 @@
   {{template "head" .}}
   {{block "head_extra" .}}{{end}}
 </head>
-<body class="font-sans antialiased{{block "body_class" .}}{{end}}" x-data="{{.AlpineData}}" x-cloak>
+<body class="font-sans antialiased noise-overlay{{block "body_class" .}}{{end}}" x-data="{{.AlpineData}}" x-cloak>
   {{template "icons" .}}
   {{block "content" .}}{{end}}
 
   <script src="/static/js/api.js"></script>
+  <script src="/static/js/motion.js"></script>
   {{block "scripts" .}}{{end}}
 </body>
 </html>

@@ -81,7 +81,7 @@ func (p *Pipeline) HotSwapStage(
 func listComposeContainers(ctx context.Context, workspaceDir, projectSlug string) ([]string, error) {
 	cmd := exec.CommandContext(ctx, "docker", "compose", "ps", "-q") //nolint:gosec
 	cmd.Dir = workspaceDir
-	cmd.Env = append(os.Environ(), "COMPOSE_PROJECT_NAME="+projectSlug)
+	cmd.Env = composeEnv(projectSlug)
 	out, err := cmd.Output()
 	if err != nil {
 		return nil, err

@@ -72,6 +72,12 @@ func (a *App) Run() error {
 	shutdownCtx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	// Close ShutdownCh when the signal fires so background goroutines (rate limiters, etc.) stop.
+	go func() {
+		<-shutdownCtx.Done()
+		close(c.ShutdownCh)
+	}()
+
 	// --- 5. Scheduler ---
 	go func() {
 		logger.Info("scheduler started")

@@ -1,3 +1,5 @@
+// Package queue provides per-project FIFO job queues backed by SQLite.
+// All state transitions go through the centralized state machine in state_machine.go.
 package queue
 
 import (
