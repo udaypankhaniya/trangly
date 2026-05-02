@@ -7,7 +7,41 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [0.1.2] — 2026-05-02
+
+### Added
+
+- **Web terminal** — SSH-like terminal access directly from the Trangly dashboard; no separate SSH client needed
+- README screenshots (Dashboard, Deployments, Project, Live Logs, Terminal, Settings)
+
+### Changed
+
+- Replaced placeholder demo section in README with actual UI screenshots
+
+---
+
+## [0.1.1] — 2026-04-11
+
+### Changed
+
+- Replace all CDN deps with self-hosted/compiled alternatives (Tailwind, Font Awesome, Geist fonts, Tom Select); only Alpine.js remains on CDN
+- Compile Tailwind CSS v4 to embedded `dist/style.min.css` (58 KB vs 400 KB CDN)
+- Replace Font Awesome with inline Lucide SVG sprite (56 icons, `scripts/build-icons.mjs`)
+- Switch to system font stack, remove Geist CDN requests
+- Self-host Tom Select 2.3.1 in `static/vendor/`
+- Full design system rewrite in `style.css` (theme tokens, component classes, animations)
+- Tighten CSP: remove `cdn.tailwindcss.com`, `cdn.jsdelivr.net`, `cdnjs.cloudflare.com`
+
+### Added
+
+- Fiber gzip middleware (`LevelBestSpeed`), skip SSE routes
+- `Cache-Control: public, max-age=3600` for static assets; `no-store` for HTML
+- Adaptive dark/light SVG favicon (terminal icon)
+
+### Performance
+
+- Binary size: 18.3 MB
+- Idle RAM: < 35 MB
 
 ---
 
@@ -77,5 +111,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/udaypankhaniya/trangly/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/udaypankhaniya/trangly/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/udaypankhaniya/trangly/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/udaypankhaniya/trangly/compare/v1.0.0...v0.1.1
 [1.0.0]: https://github.com/udaypankhaniya/trangly/releases/tag/v1.0.0

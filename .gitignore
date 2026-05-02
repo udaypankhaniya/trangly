@@ -12,7 +12,8 @@ Dockerfile
 # Coverage
 coverage.out
 coverage.html
-
+node_modules/
+.agents
 # Binaries (local builds)
 *.exe
 *.exe~
