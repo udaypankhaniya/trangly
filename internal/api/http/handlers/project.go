@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -21,6 +22,12 @@ func NewProjectHandler(projectSvc *app.ProjectService, deploySvc *app.DeployServ
 	return &ProjectHandler{projectSvc: projectSvc, deploySvc: deploySvc, ghAuthSvc: ghAuthSvc}
 }
 
+// projectWithDeploy enriches a project with its most recent deploy job.
+type projectWithDeploy struct {
+	*domain.Project
+	LastDeploy *domain.DeployJob `json:"last_deploy"`
+}
+
 // Get handles GET /api/projects/:id.
 func (h *ProjectHandler) Get(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -34,13 +41,11 @@ func (h *ProjectHandler) Get(c *fiber.Ctx) error {
 	if err != nil {
 		return respondError(c, fiber.StatusInternalServerError, err.Error())
 	}
-	type projectWithDeploy struct {
-		*domain.Project
-		LastDeploy *domain.DeployJob `json:"last_deploy"`
-	}
 	pd := projectWithDeploy{Project: project}
 	if last, err := h.deploySvc.GetLastDeploy(project.ID); err == nil {
 		pd.LastDeploy = last
+	} else {
+		slog.Warn("could not load last deploy for project", "project_id", project.ID, "err", err)
 	}
 	return respondJSON(c, fiber.StatusOK, pd)
 }
@@ -52,16 +57,13 @@ func (h *ProjectHandler) List(c *fiber.Ctx) error {
 		return respondError(c, fiber.StatusInternalServerError, err.Error())
 	}
 
-	type projectWithDeploy struct {
-		*domain.Project
-		LastDeploy *domain.DeployJob `json:"last_deploy"`
-	}
-
 	result := make([]projectWithDeploy, 0, len(projects))
 	for _, p := range projects {
 		pd := projectWithDeploy{Project: p}
 		if last, err := h.deploySvc.GetLastDeploy(p.ID); err == nil {
 			pd.LastDeploy = last
+		} else {
+			slog.Warn("could not load last deploy for project", "project_id", p.ID, "err", err)
 		}
 		result = append(result, pd)
 	}

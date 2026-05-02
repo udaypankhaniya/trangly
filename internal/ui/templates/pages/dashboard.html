@@ -4,7 +4,7 @@
 <main class="page-container">
 
     <!-- Page Header -->
-    <div class="mb-8">
+    <div class="mb-8" data-enter="slide-up" data-enter-delay="0">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-6">
             <div>
                 <h2 class="page-title mb-1">Projects</h2>
@@ -16,15 +16,22 @@
                 New Project
             </button>
         </div>
+        <!-- Search Projects -->
+        <div class="relative w-full sm:w-64" x-show="projects.length > 0" x-cloak>
+            <svg class="icon text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none" aria-hidden="true"><use href="#icon-magnifying-glass"></use></svg>
+            <input type="text" x-model="searchQuery" @input="filterProjects()"
+                placeholder="Search projects&hellip;"
+                class="w-full pl-8 pr-3 py-2 text-xs font-mono" />
+        </div>
     </div>
 
     <!-- Active Deployment Queue -->
-    <div x-show="activeJobs.length > 0" x-cloak class="mb-8">
-        <div style="border:1px solid var(--color-warn);border-left:3px solid var(--color-warn);background:var(--bg-warn);border-radius:8px;padding:16px;">
+    <div x-show="activeJobs.length > 0" x-cloak class="mb-8" data-enter="slide-up" data-enter-delay="80">
+        <div class="border border-[var(--color-warn)] border-l-[3px] bg-[var(--bg-warn)] rounded-lg p-4">
             <div class="flex items-center gap-2 mb-4">
                 <span class="relative flex h-2.5 w-2.5">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-warn)] opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--color-warn)]"></span>
                 </span>
                 <h3 class="label-mono">Active Queue</h3>
                 <span class="text-[10px] font-mono text-[var(--text-muted)] bg-[var(--bg-elevated)] px-2 py-0.5 rounded-full"
@@ -36,22 +43,22 @@
                         class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 rounded-lg bg-[var(--bg-raised)] border border-[var(--border-default)] hover:border-[var(--border-strong)] transition-all cursor-pointer group">
                         <div class="flex items-center gap-3 flex-1 min-w-0">
                             <div class="relative flex h-8 w-8 items-center justify-center rounded-lg shrink-0" :class="{
-                               'bg-yellow-500/15': ['building','running','health_check','swapping','hot_swapping'].includes(j.status),
-                               'bg-blue-500/15': j.status === 'pending',
-                               'bg-orange-500/15': j.status === 'held'
+                               'bg-[var(--color-warn)]/15': ['building','running','health_check','swapping','hot_swapping'].includes(j.status),
+                               'bg-[var(--color-info)]/15': j.status === 'pending',
+                               'bg-[var(--color-warn)]/15': j.status === 'held'
                              }">
-                                <svg class="icon icon-spin text-sm text-yellow-500" x-show="['running','building','health_check','swapping','hot_swapping'].includes(j.status)" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
-                                <svg class="icon text-sm text-blue-400" x-show="j.status === 'pending'" aria-hidden="true"><use href="#icon-clock"></use></svg>
-                                <svg class="icon text-sm text-orange-400" x-show="j.status === 'held'" aria-hidden="true"><use href="#icon-pause"></use></svg>
+                                <svg class="icon icon-spin text-sm text-[var(--color-warn)]" x-show="['running','building','health_check','swapping','hot_swapping'].includes(j.status)" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
+                                <svg class="icon text-sm text-[var(--color-info)]" x-show="j.status === 'pending'" aria-hidden="true"><use href="#icon-clock"></use></svg>
+                                <svg class="icon text-sm text-[var(--color-warn)]" x-show="j.status === 'held'" aria-hidden="true"><use href="#icon-pause"></use></svg>
                             </div>
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2 mb-0.5">
                                     <span class="font-bold text-sm truncate" x-text="projectNameForJob(j)"></span>
                                     <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-widest shrink-0"
                                         :class="{
-                                          'bg-yellow-500/15 text-yellow-500': ['building','running','health_check','swapping','hot_swapping'].includes(j.status),
-                                          'bg-blue-500/15 text-blue-400': j.status === 'pending',
-                                          'bg-orange-500/15 text-orange-400': j.status === 'held'
+                                          'bg-[var(--color-warn)]/15 text-[var(--color-warn)]': ['building','running','health_check','swapping','hot_swapping'].includes(j.status),
+                                          'bg-[var(--color-info)]/15 text-[var(--color-info)]': j.status === 'pending',
+                                          'bg-[var(--color-warn)]/15 text-[var(--color-warn)]': j.status === 'held'
                                         }" x-text="j.status.replace('_',' ')"></span>
                                 </div>
                                 <div class="flex items-center gap-2 text-[11px] font-mono text-[var(--text-muted)]">
@@ -71,8 +78,8 @@
     </div>
 
     <!-- Project Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <template x-for="p in projects" :key="p.id">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" data-enter="fade" data-enter-delay="120">
+        <template x-for="p in filteredProjects" :key="p.id">
             <div class="project-card p-5 cursor-pointer"
                 :class="{
                   'project-card--healthy':  statusForProject(p) === 'success',
@@ -156,8 +163,20 @@
         </template>
     </div>
 
+    <!-- No Search Results -->
+    <div x-show="projects.length > 0 && filteredProjects.length === 0 && !loading" class="empty-state" data-enter="fade" data-enter-delay="100">
+        <div class="empty-state-icon">
+            <svg class="icon" aria-hidden="true"><use href="#icon-magnifying-glass"></use></svg>
+        </div>
+        <h3 class="empty-state-title">No matching projects</h3>
+        <p class="empty-state-body">Try a different search term.</p>
+        <button @click="searchQuery = ''; filterProjects()" class="btn-secondary mt-4">
+            Clear search
+        </button>
+    </div>
+
     <!-- Empty State -->
-    <div x-show="projects.length === 0 && !loading" class="empty-state">
+    <div x-show="projects.length === 0 && !loading" class="empty-state" data-enter="scale" data-enter-delay="200">
         <div class="empty-state-icon">
             <svg class="icon" aria-hidden="true"><use href="#icon-rocket"></use></svg>
         </div>
@@ -171,7 +190,7 @@
 
     <!-- Footer Stats Grid -->
     <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-t border-[var(--border-subtle)]"
-        x-show="stats">
+        x-show="stats" data-enter="slide-up" data-enter-delay="200">
         <div>
             <p class="label-mono mb-3">CPU Usage</p>
             <p class="text-xl lg:text-2xl font-mono"><span x-text="stats?.cpu_usage_percent ?? '\u2014'"></span><span class="text-[var(--text-muted)]">%</span></p>
@@ -212,7 +231,7 @@
         <div class="px-6 pt-6 pb-4">
             <div class="flex items-start gap-4">
                 <div class="w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center"
-                    style="background:rgba(248,113,113,0.10)">
+                    style="background:rgba(var(--color-fail-rgb),0.10)">
                 <svg class="icon text-[var(--color-fail)] text-sm" aria-hidden="true"><use href="#icon-trash"></use></svg>
                 </div>
                 <div>

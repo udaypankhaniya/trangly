@@ -25,7 +25,7 @@
         </div>
 
         <!-- Deployment Header -->
-        <section class="mb-8">
+        <section class="mb-8" data-enter="slide-up" data-enter-delay="0">
           <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-l-4 border-[var(--accent)] pl-5 py-2">
             <div>
               <div class="flex flex-wrap items-center gap-2 mb-2">
@@ -40,7 +40,7 @@
                       }"
                       x-text="deployment.status"></span>
                 <span x-show="deployment.deploy_mode === 'hot_swap'"
-                      class="px-2 py-0.5 bg-purple-500/15 text-purple-400 text-[10px] font-mono border border-purple-500/30 uppercase tracking-widest">
+                      class="px-2 py-0.5 bg-[rgba(var(--color-running-rgb),0.15)] text-[var(--color-running)] text-[10px] font-mono border border-[rgba(var(--color-running-rgb),0.3)] uppercase tracking-widest">
                   Hot Swap
                 </span>
               </div>
@@ -94,7 +94,7 @@
                       <svg class="icon" x-show="phaseState(phase) === 'done'" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
                       <svg class="icon" x-show="phaseState(phase) === 'active' && deployment?.status === 'failed'" aria-hidden="true"><use href="#icon-circle-xmark"></use></svg>
                       <svg class="icon icon-spin" x-show="phaseState(phase) === 'active' && deployment?.status !== 'failed'" aria-hidden="true"><use href="#icon-circle-notch"></use></svg>
-                      <svg class="icon" style="opacity:0.4" x-show="phaseState(phase) !== 'done' && phaseState(phase) !== 'active'" aria-hidden="true"><use href="#icon-circle"></use></svg>
+                      <svg class="icon opacity-40" x-show="phaseState(phase) !== 'done' && phaseState(phase) !== 'active'" aria-hidden="true"><use href="#icon-circle"></use></svg>
                     </span>
                     <span class="ps-step-body">
                       <span class="ps-step-label" x-text="phase.replace(/_/g,' ')"></span>
@@ -121,8 +121,8 @@
                 <span class="label-mono">Output</span>
                 <template x-if="['running','building','health_check','swapping','hot_swapping'].includes(deployment?.status || '')">
                   <div class="flex items-center gap-1.5">
-                    <span class="inline-block w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
-                    <span class="text-[10px] font-mono uppercase tracking-widest text-yellow-400">Live</span>
+                    <span class="inline-block w-2 h-2 rounded-full bg-[var(--color-warn)] animate-pulse"></span>
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-[var(--color-warn)]">Live</span>
                   </div>
                 </template>
               </div>

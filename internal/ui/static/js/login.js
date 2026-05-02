@@ -24,10 +24,14 @@ class LoginPage {
   }
 
   async init() {
-    // Already authenticated → skip to dashboard
+    // Already authenticated → verify token is still valid before redirecting
     if (api.isAuthenticated()) {
-      window.location.replace('/dashboard');
-      return;
+      const { ok } = await api.get('/api/auth/me');
+      if (ok) {
+        window.location.replace('/dashboard');
+        return;
+      }
+      // Token is stale — interceptor already cleared it, stay on login page
     }
 
     // Check if first-run setup is needed

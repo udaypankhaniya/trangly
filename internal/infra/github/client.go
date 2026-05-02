@@ -97,32 +97,106 @@ func ExchangeManifest(ctx context.Context, code string) (*AppCredentials, error)
 }
 
 // ListRepos returns the repositories accessible to an installation access token.
+// Paginates through all pages (100 per page) to avoid silently dropping repos.
 func ListRepos(ctx context.Context, token string) ([]Repo, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet,
-		"https://api.github.com/installation/repositories?per_page=100", nil)
-	if err != nil {
-		return nil, fmt.Errorf("github: ListRepos request: %w", err)
-	}
-	setHeaders(req, token)
+	var all []Repo
+	url := "https://api.github.com/installation/repositories?per_page=100"
 
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("github: ListRepos: %w", err)
-	}
-	defer resp.Body.Close()
+	for url != "" {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return nil, fmt.Errorf("github: ListRepos request: %w", err)
+		}
+		setHeaders(req, token)
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBody))
-		return nil, newAPIError(resp, body)
-	}
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("github: ListRepos: %w", err)
+		}
 
-	var result struct {
-		Repositories []Repo `json:"repositories"`
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrorBody))
+			resp.Body.Close()
+			return nil, newAPIError(resp, body)
+		}
+
+		var result struct {
+			Repositories []Repo `json:"repositories"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+			resp.Body.Close()
+			return nil, fmt.Errorf("github: ListRepos decode: %w", err)
+		}
+		resp.Body.Close()
+
+		all = append(all, result.Repositories...)
+		url = nextPageURL(resp.Header.Get("Link"))
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("github: ListRepos decode: %w", err)
+	return all, nil
+}
+
+// nextPageURL extracts the URL for rel="next" from a GitHub Link header.
+// Returns "" if there is no next page.
+func nextPageURL(link string) string {
+	if link == "" {
+		return ""
 	}
-	return result.Repositories, nil
+	// Link header format: <URL>; rel="next", <URL>; rel="last"
+	for _, part := range splitLink(link) {
+		if hasRel(part, "next") {
+			return extractURL(part)
+		}
+	}
+	return ""
+}
+
+// splitLink splits a Link header by commas, respecting angle brackets.
+func splitLink(s string) []string {
+	var parts []string
+	start := 0
+	inBracket := false
+	for i := 0; i < len(s); i++ {
+		switch s[i] {
+		case '<':
+			inBracket = true
+		case '>':
+			inBracket = false
+		case ',':
+			if !inBracket {
+				parts = append(parts, s[start:i])
+				start = i + 1
+			}
+		}
+	}
+	if start < len(s) {
+		parts = append(parts, s[start:])
+	}
+	return parts
+}
+
+// hasRel checks if a link part contains rel="name".
+func hasRel(part, name string) bool {
+	// Look for: rel="name"
+	target := `rel="` + name + `"`
+	for i := 0; i <= len(part)-len(target); i++ {
+		if part[i:i+len(target)] == target {
+			return true
+		}
+	}
+	return false
+}
+
+// extractURL extracts the URL from a link part like `<https://...>; rel="next"`.
+func extractURL(part string) string {
+	start := -1
+	for i, c := range part {
+		if c == '<' {
+			start = i + 1
+		} else if c == '>' && start >= 0 {
+			return part[start:i]
+		}
+	}
+	return ""
 }
 
 // Branch is a minimal GitHub branch view.

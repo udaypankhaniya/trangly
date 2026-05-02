@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -170,9 +171,13 @@ func (cl *Client) singleStatSample(ctx context.Context, containerID string) (Sta
 // optionally exposing a single port. Returns the container ID.
 // Existing containers with the same name are removed first (from failed previous runs).
 func (cl *Client) RunStagingContainer(ctx context.Context, imageTag, name string, port int) (string, error) {
-	// Clean up any existing container with this name.
-	_ = cl.ContainerStop(ctx, name)
-	_ = cl.ContainerRemove(ctx, name)
+	// Clean up any existing container with this name (best-effort from failed previous runs).
+	if err := cl.ContainerStop(ctx, name); err != nil {
+		slog.Warn("docker: pre-cleanup stop failed", "container", name, "err", err)
+	}
+	if err := cl.ContainerRemove(ctx, name); err != nil {
+		slog.Warn("docker: pre-cleanup remove failed", "container", name, "err", err)
+	}
 
 	cfg := &container.Config{
 		Image: imageTag,
@@ -226,4 +231,79 @@ func (cl *Client) RunningContainerCount(ctx context.Context) (int, error) {
 		return 0, fmt.Errorf("docker: list running containers: %w", err)
 	}
 	return len(containers), nil
+}
+
+// ContainerSummary is a lightweight view of a running container.
+type ContainerSummary struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Image string `json:"image"`
+	State string `json:"state"`
+}
+
+// ListContainers returns running containers belonging to a docker-compose project.
+func (cl *Client) ListContainers(ctx context.Context, projectSlug string) ([]ContainerSummary, error) {
+	f := filters.NewArgs()
+	f.Add("status", "running")
+	if projectSlug != "" {
+		f.Add("label", "com.docker.compose.project="+projectSlug)
+	}
+	containers, err := cl.c.ContainerList(ctx, container.ListOptions{Filters: f})
+	if err != nil {
+		return nil, fmt.Errorf("docker: list containers for project %s: %w", projectSlug, err)
+	}
+	out := make([]ContainerSummary, 0, len(containers))
+	for _, c := range containers {
+		name := c.ID[:12]
+		if len(c.Names) > 0 {
+			// Docker names are prefixed with "/".
+			n := c.Names[0]
+			if len(n) > 0 && n[0] == '/' {
+				n = n[1:]
+			}
+			name = n
+		}
+		out = append(out, ContainerSummary{
+			ID:    c.ID,
+			Name:  name,
+			Image: c.Image,
+			State: c.State,
+		})
+	}
+	return out, nil
+}
+
+// ExecCreate creates an exec instance in a container and returns the exec ID.
+func (cl *Client) ExecCreate(ctx context.Context, containerID string, cmd []string) (string, error) {
+	resp, err := cl.c.ContainerExecCreate(ctx, containerID, types.ExecConfig{
+		Cmd:          cmd,
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		Tty:          true,
+	})
+	if err != nil {
+		return "", fmt.Errorf("docker: exec create in %s: %w", containerID, err)
+	}
+	return resp.ID, nil
+}
+
+// ExecAttach attaches to an exec instance and returns a hijacked connection
+// for bidirectional I/O. The caller must close the returned response.
+func (cl *Client) ExecAttach(ctx context.Context, execID string) (types.HijackedResponse, error) {
+	resp, err := cl.c.ContainerExecAttach(ctx, execID, types.ExecStartCheck{
+		Tty: true,
+	})
+	if err != nil {
+		return types.HijackedResponse{}, fmt.Errorf("docker: exec attach %s: %w", execID, err)
+	}
+	return resp, nil
+}
+
+// ExecResize resizes the TTY of an exec instance.
+func (cl *Client) ExecResize(ctx context.Context, execID string, height, width uint) error {
+	return cl.c.ContainerExecResize(ctx, execID, container.ResizeOptions{
+		Height: height,
+		Width:  width,
+	})
 }

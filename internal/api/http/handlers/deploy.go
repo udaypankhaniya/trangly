@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -49,6 +50,8 @@ func (h *DeployHandler) GetDeployment(c *fiber.Ctx) error {
 		dd.ProjectName = project.Name
 		dd.RepoFullName = project.RepoFullName
 		dd.DeployMode = project.DeployMode
+	} else {
+		slog.Warn("could not enrich deployment with project info", "project_id", job.ProjectID, "err", err)
 	}
 	return respondJSON(c, fiber.StatusOK, dd)
 }

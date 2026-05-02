@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"os"
 	"os/exec"
 
 	"github.com/udaypankhaniya/trangly/internal/domain"
@@ -40,7 +39,7 @@ func (p *Pipeline) SwapStage(
 	downCmd.Dir = workspaceDir
 	downCmd.Stdout = logW
 	downCmd.Stderr = logW
-	downCmd.Env = append(os.Environ(), "COMPOSE_PROJECT_NAME="+projectSlug)
+	downCmd.Env = composeEnv(projectSlug)
 	downCmd.Cancel = func() error { return downCmd.Process.Kill() }
 	if err := downCmd.Run(); err != nil {
 		// Non-fatal — may not have existing containers.
@@ -60,7 +59,7 @@ func (p *Pipeline) SwapStage(
 	upCmd.Dir = workspaceDir
 	upCmd.Stdout = logW
 	upCmd.Stderr = logW
-	upCmd.Env = append(os.Environ(), "COMPOSE_PROJECT_NAME="+projectSlug)
+	upCmd.Env = composeEnv(projectSlug)
 	upCmd.Cancel = func() error { return upCmd.Process.Kill() }
 
 	if err := upCmd.Run(); err != nil {
@@ -96,7 +95,7 @@ func (p *Pipeline) removeConflictingContainers(
 	cfgCmd.Dir = workspaceDir
 	cfgCmd.Stdout = &buf
 	cfgCmd.Stderr = logW
-	cfgCmd.Env = append(os.Environ(), "COMPOSE_PROJECT_NAME="+projectSlug)
+	cfgCmd.Env = composeEnv(projectSlug)
 	cfgCmd.Cancel = func() error { return cfgCmd.Process.Kill() }
 
 	if err := cfgCmd.Run(); err != nil {

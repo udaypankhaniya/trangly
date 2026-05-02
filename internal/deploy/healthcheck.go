@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 
 	"github.com/udaypankhaniya/trangly/internal/domain"
@@ -37,7 +36,7 @@ func (p *Pipeline) HealthCheckStage(
 	cmd.Dir = workspaceDir
 	cmd.Stdout = logW
 	cmd.Stderr = logW
-	cmd.Env = append(os.Environ(), "COMPOSE_PROJECT_NAME="+projectSlug)
+	cmd.Env = composeEnv(projectSlug)
 	cmd.Cancel = func() error { return cmd.Process.Kill() }
 
 	if err := cmd.Run(); err != nil {

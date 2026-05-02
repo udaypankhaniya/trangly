@@ -2,13 +2,13 @@
     <main class="page-container">
 
       <!-- Page Header -->
-      <header class="mb-6">
+      <header class="mb-6" data-enter="slide-up" data-enter-delay="0">
         <h1 class="page-title mb-1">Settings</h1>
         <p class="body-sm font-mono">Configure integrations and inspect system health.</p>
       </header>
 
       <!-- Bento Grid -->
-      <div class="settings-bento">
+      <div class="settings-bento" data-enter="fade" data-enter-delay="100">
 
         <!-- GitHub Integration Card (spans 2 cols) -->
         <div class="bento-card bento-card--github">
@@ -108,10 +108,15 @@
             <svg class="icon text-[var(--text-secondary)]" aria-hidden="true"><use href="#icon-microchip"></use></svg>
             <span class="section-title">Memory</span>
             <template x-if="ram">
-              <span class="ml-auto font-mono text-lg font-bold text-[var(--text-primary)]">
+              <span class="font-mono text-lg font-bold text-[var(--text-primary)]">
                 <span x-text="ramPercent()"></span><span class="text-[var(--text-muted)] text-sm">%</span>
               </span>
             </template>
+            <button @click="refreshRAM()" :disabled="!ram"
+              class="ml-auto btn-ghost p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Refresh memory stats">
+              <svg class="icon text-sm" :class="{ 'icon-spin': !ram }" aria-hidden="true"><use href="#icon-arrows-rotate"></use></svg>
+            </button>
           </div>
           <div class="bento-card-body">
             <template x-if="ram">
@@ -151,6 +156,11 @@
               <span class="ml-auto label-mono"
                 x-text="preflight.filter(c => c.status === 'ok' || c.status === 'pass').length + ' / ' + preflight.length + ' passing'"></span>
             </template>
+            <button @click="refreshPreflight()" :disabled="preflight.length === 0 && preflightRefreshing"
+              class="btn-ghost p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Refresh preflight checks">
+              <svg class="icon text-sm" :class="{ 'icon-spin': preflightRefreshing }" aria-hidden="true"><use href="#icon-arrows-rotate"></use></svg>
+            </button>
           </div>
           <div class="bento-preflight-grid">
             <div x-show="preflight.length === 0" class="bento-check-empty">
@@ -184,7 +194,7 @@
           <div class="px-6 pt-6 pb-4">
             <div class="flex items-start gap-4">
               <div class="w-9 h-9 flex-shrink-0 rounded-lg flex items-center justify-center"
-                   style="background:rgba(251,191,36,0.10)">
+                   style="background:rgba(var(--color-warn-rgb),0.10)">
               <svg class="icon text-[var(--color-warn)] text-sm" aria-hidden="true"><use href="#icon-triangle-exclamation"></use></svg>
               </div>
               <div>

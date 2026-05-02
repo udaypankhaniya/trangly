@@ -28,6 +28,7 @@ type Container struct {
 	Config         config.Config
 	DB             *db.DB
 	MasterKey      []byte
+	ShutdownCh     chan struct{} // closed on shutdown to stop background goroutines
 	AuthSvc        *app.AuthService
 	ProjectSvc     *app.ProjectService
 	DeploySvc      *app.DeployService
@@ -46,7 +47,7 @@ type Container struct {
 
 // NewContainer constructs all services in dependency order.
 func NewContainer(cfg config.Config, baseURL string) (*Container, error) {
-	c := &Container{Config: cfg}
+	c := &Container{Config: cfg, ShutdownCh: make(chan struct{})}
 
 	// 1. Database
 	database, err := db.New(cfg.DBPath)
@@ -102,7 +103,7 @@ func NewContainer(cfg config.Config, baseURL string) (*Container, error) {
 
 	// 10. Scheduler
 	mon := scheduler.NewMonitor(database)
-	sched, err := scheduler.NewScheduler(database, qm, mon, c.Runner)
+	sched, err := scheduler.NewScheduler(database, qm, mon, c.Runner, c.Supervisor)
 	if err != nil {
 		return nil, fmt.Errorf("bootstrap: scheduler: %w", err)
 	}
@@ -115,6 +116,7 @@ func NewContainer(cfg config.Config, baseURL string) (*Container, error) {
 	c.HTTPServer = apihttp.NewServer(apihttp.Config{
 		Port:           cfg.Port,
 		BaseURL:        baseURL,
+		ShutdownCh:     c.ShutdownCh,
 		DB:             database,
 		Docker:         dc,
 		AuthSvc:        authSvc,

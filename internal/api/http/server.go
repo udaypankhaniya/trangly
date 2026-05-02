@@ -14,6 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
+	"github.com/gofiber/websocket/v2"
 
 	"github.com/udaypankhaniya/trangly/internal/api/http/handlers"
 	"github.com/udaypankhaniya/trangly/internal/api/http/middleware"
@@ -37,6 +38,9 @@ type Server struct {
 type Config struct {
 	Port    int
 	BaseURL string
+	// ShutdownCh is closed when the server is shutting down.
+	// Used to stop background goroutines such as rate limiter cleanup.
+	ShutdownCh <-chan struct{}
 	// TrustProxy controls whether X-Forwarded-For is trusted for IP extraction in the
 	// rate limiter. Set true only when running behind a known trusted reverse proxy.
 	TrustProxy     bool
@@ -96,7 +100,7 @@ func NewServer(cfg Config) *Server {
 		Next: func(c *fiber.Ctx) bool {
 			// Skip compression for SSE routes (text/event-stream).
 			p := c.Path()
-			return p == "/api/events" || strings.HasPrefix(p, "/api/deployments/")
+			return p == "/api/events" || strings.HasPrefix(p, "/api/deployments/") || strings.HasPrefix(p, "/api/containers/")
 		},
 	}))
 	fiberApp.Use(middleware.Security())
@@ -118,6 +122,7 @@ func NewServer(cfg Config) *Server {
 	deph := handlers.NewDeployHandler(cfg.DeploySvc, cfg.ProjectSvc, cfg.Broadcaster)
 	queueh := handlers.NewQueueHandler(cfg.DeploySvc, cfg.QueueMgr)
 	eventh := handlers.NewEventsHandler(cfg.DeploySvc, cfg.Broadcaster)
+	termh := handlers.NewTerminalHandler(cfg.Docker)
 
 	// --- Public routes (no auth) ---
 	fiberApp.Get("/api/version", sysh.Version)
@@ -125,11 +130,11 @@ func NewServer(cfg Config) *Server {
 	fiberApp.Get("/api/setup/status", sysh.SetupStatus)
 	fiberApp.Post("/api/setup", sysh.Setup)
 	// Login is rate-limited to 5 attempts/min per IP to block brute-force attacks.
-	fiberApp.Post("/api/auth/login", middleware.RateLimit(5, time.Minute, cfg.TrustProxy), authh.Login)
+	fiberApp.Post("/api/auth/login", middleware.RateLimit(5, time.Minute, cfg.TrustProxy, cfg.ShutdownCh), authh.Login)
 	fiberApp.Get("/api/github/callback", ghh.Callback)
 
 	// --- Webhook (rate-limited, not JWT-authenticated — has own HMAC check) ---
-	fiberApp.Post("/webhooks/github", middleware.RateLimit(60, time.Minute, cfg.TrustProxy), cfg.WebhookHandler.FiberHandler())
+	fiberApp.Post("/webhooks/github", middleware.RateLimit(60, time.Minute, cfg.TrustProxy, cfg.ShutdownCh), cfg.WebhookHandler.FiberHandler())
 
 	// --- Authenticated routes ---
 	// Auth middleware is applied inline per-route. Do NOT use Group("") with auth
@@ -172,6 +177,10 @@ func NewServer(cfg Config) *Server {
 
 	// --- SSE dashboard events ---
 	fiberApp.Get("/api/events", authMW, eventh.Stream)
+
+	// --- Terminal (container exec via WebSocket) ---
+	fiberApp.Get("/api/containers", authMW, termh.ListContainers)
+	fiberApp.Get("/api/containers/:id/terminal", authMW, websocket.New(termh.ExecTerminal))
 
 	// --- Embedded UI (catch-all, must be last) ---
 	ui.RegisterRoutes(fiberApp)

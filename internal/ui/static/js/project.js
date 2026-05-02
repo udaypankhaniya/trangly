@@ -33,6 +33,16 @@ class ProjectPage {
     this._reconnectTimer = null;
     this._sseFailCount = 0;
     this.selectedPhase = null;
+
+    // ── Terminal ────────────────────────────────────────────────
+    this.containers = [];
+    this.selectedContainer = '';
+    this.termConnected = false;
+    this.termLoading = false;
+    this._term = null;
+    this._fitAddon = null;
+    this._ws = null;
+    this._resizeObserver = null;
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────
@@ -53,6 +63,7 @@ class ProjectPage {
   destroy() {
     this._closeLogStream();
     this._closeDashboardStream();
+    this.disconnectTerminal();
     if (this._reconnectTimer) clearTimeout(this._reconnectTimer);
   }
 
@@ -171,9 +182,17 @@ class ProjectPage {
   // ── Tabs ──────────────────────────────────────────────────────
 
   switchTab(tab) {
+    const prevTab = this.tab;
     this.tab = tab;
     if (tab === 'history' && this.history.length === 0) {
       this.loadHistory();
+    }
+    if (tab === 'terminal' && this.containers.length === 0) {
+      this.loadContainers();
+    }
+    // Disconnect terminal when leaving tab.
+    if (prevTab === 'terminal' && tab !== 'terminal') {
+      this.disconnectTerminal();
     }
   }
 
@@ -335,6 +354,155 @@ class ProjectPage {
 
   timeAgo(d) { return timeAgo(d); }
   duration(s, e) { return duration(s, e); }
+
+  // ── Terminal ──────────────────────────────────────────────────
+
+  /** JS port of Go's safeSlug() from engine/runner.go */
+  _safeSlug(name) {
+    let slug = '';
+    for (let i = 0; i < name.length; i++) {
+      const c = name.charCodeAt(i);
+      if ((c >= 97 && c <= 122) || (c >= 48 && c <= 57)) {  // a-z, 0-9
+        slug += name[i];
+      } else if (c >= 65 && c <= 90) {  // A-Z → lowercase
+        slug += String.fromCharCode(c + 32);
+      } else {
+        if (slug.length > 0 && slug[slug.length - 1] !== '-') slug += '-';
+      }
+    }
+    // Trim trailing dashes.
+    while (slug.endsWith('-')) slug = slug.slice(0, -1);
+    return slug;
+  }
+
+  async loadContainers() {
+    if (!this.project) return;
+    this.termLoading = true;
+    try {
+      const slug = this._safeSlug(this.project.name);
+      const { ok, data } = await api.get('/api/containers?project=' + encodeURIComponent(slug));
+      this.containers = ok ? (data || []) : [];
+      // Auto-select first container and connect.
+      if (this.containers.length > 0 && !this.selectedContainer) {
+        this.selectedContainer = this.containers[0].id;
+        this.$nextTick(() => this.connectTerminal());
+      }
+    } catch {
+      this.containers = [];
+    } finally {
+      this.termLoading = false;
+    }
+  }
+
+  onContainerChange() {
+    this.disconnectTerminal();
+    if (this.selectedContainer) {
+      this.$nextTick(() => this.connectTerminal());
+    }
+  }
+
+  selectContainer(id) {
+    if (id === this.selectedContainer && this.termConnected) return; // already connected
+    this.disconnectTerminal();
+    this.selectedContainer = id;
+    this.$nextTick(() => this.connectTerminal());
+  }
+
+  connectTerminal() {
+    const el = document.getElementById('terminal-el');
+    if (!el) return;
+    el.innerHTML = '';
+
+    const Terminal = window.Terminal;
+    const FitAddon = window.FitAddon.FitAddon;
+
+    const term = new Terminal({
+      cursorBlink: true,
+      fontSize: 14,
+      fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+      theme: this._getTermTheme(),
+    });
+
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(el);
+    try { fitAddon.fit(); } catch (_) { /* ignore initial fit */ }
+
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const token = api.getToken();
+    const wsUrl = `${proto}//${location.host}/api/containers/${this.selectedContainer}/terminal?token=${encodeURIComponent(token)}`;
+
+    const ws = new WebSocket(wsUrl);
+    ws.binaryType = 'arraybuffer';
+
+    ws.onopen = () => {
+      this.termConnected = true;
+      term.focus();
+      ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+    };
+
+    ws.onmessage = (evt) => {
+      if (evt.data instanceof ArrayBuffer) {
+        term.write(new Uint8Array(evt.data));
+      } else {
+        term.write(evt.data);
+      }
+    };
+
+    ws.onclose = () => {
+      this.termConnected = false;
+      term.write('\r\n\x1b[90m[Session ended]\x1b[0m\r\n');
+    };
+
+    ws.onerror = () => {
+      this.termConnected = false;
+      term.write('\r\n\x1b[31m[Connection error]\x1b[0m\r\n');
+    };
+
+    term.onData((data) => {
+      if (ws.readyState === WebSocket.OPEN) ws.send(data);
+    });
+
+    term.onBinary((data) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        const bytes = new Uint8Array(data.length);
+        for (let i = 0; i < data.length; i++) bytes[i] = data.charCodeAt(i) & 0xff;
+        ws.send(bytes.buffer);
+      }
+    });
+
+    term.onResize(({ cols, rows }) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'resize', cols, rows }));
+      }
+    });
+
+    this._resizeObserver = new ResizeObserver(() => {
+      try { fitAddon.fit(); } catch (_) { /* ignore */ }
+    });
+    this._resizeObserver.observe(el);
+
+    this._term = term;
+    this._fitAddon = fitAddon;
+    this._ws = ws;
+  }
+
+  disconnectTerminal() {
+    if (this._ws) { this._ws.close(); this._ws = null; }
+    if (this._resizeObserver) { this._resizeObserver.disconnect(); this._resizeObserver = null; }
+    if (this._term) { this._term.dispose(); this._term = null; }
+    this._fitAddon = null;
+    this.termConnected = false;
+  }
+
+  _getTermTheme() {
+    return {
+      background: '#000000',
+      foreground: '#cccccc',
+      cursor: '#cccccc',
+      selectionBackground: 'rgba(255,255,255,0.2)',
+    };
+  }
 }
 
 // Register with Alpine

@@ -30,6 +30,10 @@ class DashboardPage {
     this.showDeleteConfirm = false;
     this._pendingDelete = null;
 
+    // ── Search / Filter ───────────────────────────────────────────
+    this.searchQuery = '';
+    this.filteredProjects = [];
+
     // ── Loading flag ──────────────────────────────────────────────
     this.loading = true;
   }
@@ -64,7 +68,22 @@ class DashboardPage {
 
   async loadProjects() {
     const { ok, data } = await api.get('/api/projects');
-    if (ok) this.projects = data.projects || [];
+    if (ok) {
+      this.projects = data.projects || [];
+      this.filterProjects();
+    }
+  }
+
+  filterProjects() {
+    const q = (this.searchQuery || '').toLowerCase().trim();
+    if (!q) {
+      this.filteredProjects = this.projects;
+      return;
+    }
+    this.filteredProjects = this.projects.filter(p =>
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.repo_full_name || '').toLowerCase().includes(q)
+    );
   }
 
   async loadStats() {

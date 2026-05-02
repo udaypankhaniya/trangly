@@ -17,6 +17,7 @@ class SettingsPage {
     // ── System ──────────────────────────────────────────────────
     this.ram = null;
     this.preflight = [];
+    this.preflightRefreshing = false;
 
   }
 
@@ -63,9 +64,21 @@ class SettingsPage {
     if (ok) this.ram = data;
   }
 
+  async refreshRAM() {
+    this.ram = null;
+    await this.loadRAM();
+  }
+
   async loadPreflight() {
     const { ok, data } = await api.get('/api/system/preflight');
     if (ok) this.preflight = data.checks || [];
+  }
+
+  async refreshPreflight() {
+    this.preflightRefreshing = true;
+    this.preflight = [];
+    await this.loadPreflight();
+    this.preflightRefreshing = false;
   }
 
   // ── GitHub Connect (Step 1) ───────────────────────────────────

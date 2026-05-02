@@ -1,3 +1,5 @@
+// Package system provides startup preflight checks and host resource readers
+// (CPU, memory, OS distribution). All checks return structured CheckResult values.
 package system
 
 import (
