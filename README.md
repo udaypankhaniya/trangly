@@ -76,6 +76,14 @@ Old production keeps running through every step until the new build passes its h
 
 ## Screenshots
 
+### Sign In
+
+![Trangly Sign In](screenshots/Trangly-—-Sign-In-05-04-2026_05_19_PM.png)
+
+### First Run Setup
+
+![Trangly First Run Setup](screenshots/Trangly-—-First-Run-Setup-05-01-2026_06_25_PM.png)
+
 ### Dashboard
 
 ![Trangly Dashboard](screenshots/Trangly-—-Dashboard-05-01-2026_06_28_PM.png)
